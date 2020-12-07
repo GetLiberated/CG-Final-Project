@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+            <title>Car Driving</title>
+            <script src="http://cdn.babylonjs.com/2-4/babylon.max.js"></script>
+            <script src="https://cdn.babylonjs.com/babylon.js"></script>
+            <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+            <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+            <style>
+                #canvas{
+                    width:100%;
+                    height:100%;
+                }
+            </style>
+    </head>
+    <body>
+            <canvas id ="canvas"></canvas>
+
+            <script>
+                window.addEventListener("DOMContentLoaded", function(){
+                    var canvas = document.getElementById("canvas");
+                    var engine = new BABYLON.Engine(canvas,true);
+
+                    var createScene = function(){
+                        var scene = new BABYLON.Scene(engine);
+                        scene.clearColor = new BABYLON.Color3.Blue();
+
+
+                        /* trying to use car model and change the box mesh to car but faktap */
+
+                        // var car = new BABYLON.SceneLoader.ImportMesh('', 'Car.fbx', scene, (obj) => {
+                        //     obj.forEach((object, index) => {
+                        //         object.position = new BABYLON.Vector3(5, 0, 0);
+
+                        //         var mat = new BABYLON.StandardMaterial('Car_Texture', scene);
+                        //         mat.diffuseTexture = new BABYLON.Texture("black.jpg");
+                        //         mat.specularColor = new BABYLON.Color3(0,0,0);
+                        //         object.material = mat;
+                        //     });
+                        // });
+                        // console.log(car)
+                        var box = BABYLON.Mesh.CreateBox("Box", 4, scene);
+                        var camera = new BABYLON.ArcRotateCamera("arcCamera", BABYLON.Tools.ToRadians(45), BABYLON.Tools.ToRadians(45),10.0, box.position, scene);
+                        camera.attachControl(canvas,true);
+                        
+                        return scene;
+                    }
+
+                    var scene = createScene();
+                    engine.runRenderLoop(function(){
+                        scene.getMeshByName("Box").position.z += 0.01;
+                        scene.render();
+                    });
+                });
+            </script>
+    </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Driving</title>
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <style>
+        html,body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #render {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="render" touch-action="none"></canvas>
+    <script>
+        var canvas = document.getElementById("render")
+        var engine = new BABYLON.Engine(canvas, true)
+        var createScene = () => {
+            var scene = new BABYLON.Scene(engine);
+
+            var camera = new BABYLON.ArcRotateCamera("Camera", Math.PI / 4, Math.PI / 3, 2, new BABYLON.Vector3(10, 10 ,10), scene);
+            camera.attachControl(canvas, true);
+
+            var hemisphericLight = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(50, 30, 0), scene);
+
+            var car = new BABYLON.SceneLoader.ImportMesh('', 'Car.fbx', scene, (obj) => {
+                obj.forEach((object, index) => {
+                    object.position = new BABYLON.Vector3(5, 0, 0);
+
+                    var mat = new BABYLON.StandardMaterial('Car_Texture', scene);
+                    mat.diffuseTexture = new BABYLON.Texture("black.jpg");
+                    mat.specularColor = new BABYLON.Color3(0,0,0);
+                    object.material = mat;
+
+                    var carAnimation = new BABYLON.Animation("carAnimation", "rotation.z", 60 , BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_RELATIVE);
+                    var carAnimationKeys = [];
+                    carAnimationKeys.push({
+                        frame: 0,
+                        value: 0
+                    });
+                    carAnimationKeys.push({
+                        frame: 100,
+                        value: Math.PI
+                    });
+                    carAnimation.setKeys(carAnimationKeys);
+
+                    obj.animations = [carAnimation];
+                    scene.beginAnimation(obj, 100, 0, true);
+                });
+            });
+
+            console.log(car)
+
+            return scene;
+        }
+
+        let scene = createScene();
+
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
+
+        window.addEventListener("resize", () => {
+            engine.resize();
+        });
+    </script>
+</body>
+</html> -->
