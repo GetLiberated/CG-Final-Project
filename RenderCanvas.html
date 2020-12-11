@@ -113,11 +113,11 @@
                     /*-------------------Pivots for Front Wheels-----------------------------------*/
                     var pivotFI = new BABYLON.Mesh("pivotFI", scene);
                     pivotFI.parent = carBody;
-                    pivotFI.position = new BABYLON.Vector3(-6.5, 0, -2);
+                    pivotFI.position = new BABYLON.Vector3(-7, 0, -1.5);
                     
                     var pivotFO = new BABYLON.Mesh("pivotFO", scene);
                     pivotFO.parent = carBody;
-                    pivotFO.position = new BABYLON.Vector3(-6.5, 0, 2);  
+                    pivotFO.position = new BABYLON.Vector3(-7, 0, 1.5);  
                     /*----------------End Pivots for Front Wheels--------------------------------*/
                     
                     /*------------Create other Wheels as Instances, Parent and Position----------*/
@@ -127,11 +127,11 @@
                     
                     var wheelRI = wheelFI.createInstance("RI");
                     wheelRI.parent = carBody;
-                    wheelRI.position = new BABYLON.Vector3(0, 0, -2.8);
+                    wheelRI.position = new BABYLON.Vector3(3, 0, -2.8);
                     
                     var wheelRO = wheelFI.createInstance("RO");
                     wheelRO.parent = carBody;
-                    wheelRO.position = new BABYLON.Vector3(0, 0, 2.8);
+                    wheelRO.position = new BABYLON.Vector3(3, 0, 2.8);
                     
                     wheelFI.parent = pivotFI;
                     wheelFI.position = new BABYLON.Vector3(0, 0, -1.8);
