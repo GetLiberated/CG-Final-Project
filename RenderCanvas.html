@@ -183,27 +183,21 @@
 
                     /*****************************End Map********************************************/ 
                     
-                    /*****************************Particles to Show Movement********************************************/ 
-                    // var box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-                    // box.position = new BABYLON.Vector3(20, 0, 10);
-                    
+                    /*****************************Skybox********************************************/ 
+                    let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:250}, scene)
+                    let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
+                    skyboxMaterial.backFaceCulling = false
+                    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skybox/skybox", scene)
+                    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
 
-                    // var boxesSPS = new BABYLON.SolidParticleSystem("boxes", scene, {updatable: false});
-                        
-                    //     //function to position of grey boxes
-                    //     var set_boxes = function(particle, i, s) {
-                    //         particle.position = new BABYLON.Vector3(-200 + Math.random()*400, 0, -200 + Math.random()*400); 
-                    //     }
-                        
-                    //     //add 400 boxes
-                    //     boxesSPS.addShape(box, 400, {positionFunction:set_boxes});  
-                    //     var boxes = boxesSPS.buildMesh(); // mesh of boxes
-                    //     boxes.material = new BABYLON.StandardMaterial("", scene);
-                    //     boxes.material.alpha = 0.5;
-                    //     boxes.checkCollisions = true
-                    /*****************************Particles to Show Movement********************************************/
-                    
-                    
+                    skybox.infiniteDistance = true
+                    skyboxMaterial.disableLighting = true
+                    skybox.material = skyboxMaterial
+
+                    scene.fogMode = BABYLON.Scene.FOGMODE_EXP
+                    scene.fogDensity = 0.01
+                    scene.fogColor = new BABYLON.Color3(0.9, 0.9, 0.85)
+                    /*****************************End Skybox********************************************/
                     
                     /****************************Key Controls************************************************/
                     
