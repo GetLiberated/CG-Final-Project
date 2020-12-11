@@ -108,116 +108,142 @@
                         
                         //rotate wheel so tread in xz plane  
                         wheelFI.rotate(BABYLON.Axis.X, Math.PI/2, BABYLON.Space.WORLD); 	
-                    /*-----------------------End Wheel------------------------------------------*/ 
-                    
-                    /*-------------------Pivots for Front Wheels-----------------------------------*/
-                    var pivotFI = new BABYLON.Mesh("pivotFI", scene);
-                    pivotFI.parent = carBody;
-                    pivotFI.position = new BABYLON.Vector3(-7, 0, -1.5);
-                    
-                    var pivotFO = new BABYLON.Mesh("pivotFO", scene);
-                    pivotFO.parent = carBody;
-                    pivotFO.position = new BABYLON.Vector3(-7, 0, 1.5);  
-                    /*----------------End Pivots for Front Wheels--------------------------------*/
-                    
-                    /*------------Create other Wheels as Instances, Parent and Position----------*/
-                    var wheelFO = wheelFI.createInstance("FO");
-                    wheelFO.parent = pivotFO;
-                    wheelFO.position = new BABYLON.Vector3(0, 0, 1.8);
-                    
-                    var wheelRI = wheelFI.createInstance("RI");
-                    wheelRI.parent = carBody;
-                    wheelRI.position = new BABYLON.Vector3(3, 0, -2.8);
-                    
-                    var wheelRO = wheelFI.createInstance("RO");
-                    wheelRO.parent = carBody;
-                    wheelRO.position = new BABYLON.Vector3(3, 0, 2.8);
-                    
-                    wheelFI.parent = pivotFI;
-                    wheelFI.position = new BABYLON.Vector3(0, 0, -1.8);
-                    /*------------End Create other Wheels as Instances, Parent and Position----------*/
-                    
-                    /*---------------------Create Car Centre of Rotation-----------------------------*/
-                    pivot = new BABYLON.Mesh("pivot", scene); //current centre of rotation
-                    pivot.position.z = 50;
-                    carBody.parent = pivot;
-                    carBody.position = new BABYLON.Vector3(0, 0, -50);
-                    
-                    /*---------------------End Create Car Centre of Rotation-------------------------*/
-                    
-                    
-                    /*************************** End Car*********************************************/
-                    
-                    /*****************************Add Ground********************************************/
-                    var groundSize = 400;
-                    
-                    var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: groundSize, height: groundSize}, scene);
-                    var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-                    groundMaterial.diffuseColor = new BABYLON.Color3(0.75, 1, 0.25);
-                    ground.material = groundMaterial;
-                    ground.position.y = -1.5;
-                    /*****************************End Add Ground********************************************/ 
-                    
-                    /*****************************Particles to Show Movement********************************************/ 
-                    var box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-                    box.position = new BABYLON.Vector3(20, 0, 10);
-                    
+                        /*-----------------------End Wheel------------------------------------------*/ 
+                        
+                        /*-------------------Pivots for Front Wheels-----------------------------------*/
+                        var pivotFI = new BABYLON.Mesh("pivotFI", scene);
+                        pivotFI.parent = carBody;
+                        pivotFI.position = new BABYLON.Vector3(-7, 0, -1.5);
+                        
+                        var pivotFO = new BABYLON.Mesh("pivotFO", scene);
+                        pivotFO.parent = carBody;
+                        pivotFO.position = new BABYLON.Vector3(-7, 0, 1.5);  
+                        /*----------------End Pivots for Front Wheels--------------------------------*/
+                        
+                        /*------------Create other Wheels as Instances, Parent and Position----------*/
+                        var wheelFO = wheelFI.createInstance("FO");
+                        wheelFO.parent = pivotFO;
+                        wheelFO.position = new BABYLON.Vector3(0, 0, 1.8);
+                        
+                        var wheelRI = wheelFI.createInstance("RI");
+                        wheelRI.parent = carBody;
+                        wheelRI.position = new BABYLON.Vector3(3, 0, -2.8);
+                        
+                        var wheelRO = wheelFI.createInstance("RO");
+                        wheelRO.parent = carBody;
+                        wheelRO.position = new BABYLON.Vector3(3, 0, 2.8);
+                        
+                        wheelFI.parent = pivotFI;
+                        wheelFI.position = new BABYLON.Vector3(0, 0, -1.8);
+                        /*------------End Create other Wheels as Instances, Parent and Position----------*/
+                        
+                        /*---------------------Create Car Centre of Rotation-----------------------------*/
+                        pivot = new BABYLON.Mesh("pivot", scene); //current centre of rotation
+                        pivot.position.z = 50;
+                        carBody.parent = pivot;
+                        carBody.position = new BABYLON.Vector3(0, 0, -50);
+                        
+                        /*---------------------End Create Car Centre of Rotation-------------------------*/
+                        
+                        
+                        /*************************** End Car*********************************************/
+                        
+                        /*****************************Map********************************************/
+                        // var groundSize = 400;
+                        
+                        // var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: groundSize, height: groundSize}, scene);
+                        // var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
+                        // groundMaterial.diffuseColor = new BABYLON.Color3(0.75, 1, 0.25);
+                        // ground.material = groundMaterial;
+                        // ground.position.y = -1.5;
 
-                    var boxesSPS = new BABYLON.SolidParticleSystem("boxes", scene, {updatable: false});
-                        
-                        //function to position of grey boxes
-                        var set_boxes = function(particle, i, s) {
-                            particle.position = new BABYLON.Vector3(-200 + Math.random()*400, 0, -200 + Math.random()*400); 
-                        }
-                        
-                        //add 400 boxes
-                        boxesSPS.addShape(box, 400, {positionFunction:set_boxes});  
-                        var boxes = boxesSPS.buildMesh(); // mesh of boxes
-                        boxes.material = new BABYLON.StandardMaterial("", scene);
-                        boxes.material.alpha = 0.5;
-                    /*****************************Particles to Show Movement********************************************/
-                    
-                    
-                    
-                    /****************************Key Controls************************************************/
-                    
-                    var map ={}; //object for multiple key presses
-                    scene.actionManager = new BABYLON.ActionManager(scene);
-                    
-                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {								
-                            map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                        let mapMesh;
+                        new BABYLON.SceneLoader.ImportMesh(null, "./assets/RoadMapREAL/", "RoadMapAfterBlender.obj", scene, (obj) => {
+                            mapMesh = obj;
+                            var lastPosition = new BABYLON.Vector3(0,0,0)
+                            scene.onBeforeRenderObservable.add(()=>{
+                                // Compute world matrix which is used for intersection
+                                carBody.computeWorldMatrix()
+                                obj.forEach((object, index) => {
+                                    object.position = new BABYLON.Vector3(0, -70, 0)
+                                    object.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
+                                    object.rotation = new BABYLON.Vector3(0, 0, 0)
+
+                                    object.checkCollisions = true
+                                    object.computeWorldMatrix()
+                                    if(carBody.intersectsMesh(object, true)){
+                                        console.log(object.name)
+                                        // carBody.position.copyFrom(lastPosition)
+                                    }
+                                });
+                                lastPosition.copyFrom(carBody.position)
+                            })
                             
-                        }));
-                        
-                    scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {								
-                            map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-                        }));	
-                        
-                    /****************************End Key Controls************************************************/
-                    
-                    
-                    /****************************Variables************************************************/
-                    
-                    var theta = 0;
-                    var deltaTheta = 0;
-                    var D = 0; //distance translated per second
-                    var R = 50; //turning radius, initial set at pivot z value
-                    var NR; //Next turning radius on wheel turn
-                    var A = 4; // axel length
-                    var L = 4; //distance between wheel pivots
-                    var r = 1.5; // wheel radius
-                    var psi, psiRI, psiRO, psFI, psiFO; //wheel rotations  
-                    var phi; //rotation of car when turning 
-                    
-                    var F; // frames per second	
+                        });
 
-                    var G = 1; // gear
-                    
-                    /****************************End Variables************************************************/
-                    
+                        /*****************************End Map********************************************/ 
+                        
+                        /*****************************Particles to Show Movement********************************************/ 
+                        // var box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+                        // box.position = new BABYLON.Vector3(20, 0, 10);
+                        
 
-                    
-                    /****************************Animation******************************************************/	
+                        // var boxesSPS = new BABYLON.SolidParticleSystem("boxes", scene, {updatable: false});
+                            
+                        //     //function to position of grey boxes
+                        //     var set_boxes = function(particle, i, s) {
+                        //         particle.position = new BABYLON.Vector3(-200 + Math.random()*400, 0, -200 + Math.random()*400); 
+                        //     }
+                            
+                        //     //add 400 boxes
+                        //     boxesSPS.addShape(box, 400, {positionFunction:set_boxes});  
+                        //     var boxes = boxesSPS.buildMesh(); // mesh of boxes
+                        //     boxes.material = new BABYLON.StandardMaterial("", scene);
+                        //     boxes.material.alpha = 0.5;
+                        //     boxes.checkCollisions = true
+                        /*****************************Particles to Show Movement********************************************/
+                        
+                        
+                        
+                        /****************************Key Controls************************************************/
+                        
+                        var map ={}; //object for multiple key presses
+                        scene.actionManager = new BABYLON.ActionManager(scene);
+                        
+                        scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {								
+                                map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                                
+                            }));
+                            
+                        scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {								
+                                map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+                            }));	
+                            
+                        /****************************End Key Controls************************************************/
+                        
+                        
+                        /****************************Variables************************************************/
+                        
+                        var theta = 0;
+                        var deltaTheta = 0;
+                        var D = 0; //distance translated per second
+                        var R = 50; //turning radius, initial set at pivot z value
+                        var NR; //Next turning radius on wheel turn
+                        var A = 4; // axel length
+                        var L = 4; //distance between wheel pivots
+                        var r = 1.5; // wheel radius
+                        var psi, psiRI, psiRO, psFI, psiFO; //wheel rotations  
+                        var phi; //rotation of car when turning 
+                        
+                        var F; // frames per second	
+
+                        var G = 1; // gear
+                        
+                        /****************************End Variables************************************************/
+                        
+
+                        
+                        /****************************Animation******************************************************/	
                         
                         scene.registerAfterRender(function() {	
                             F = engine.getFps();
@@ -248,20 +274,20 @@
                                 D += 1	
                             };
 
-                            if(map["w"] && D < 30 && G == 2) {
+                            if(map["w"] && D < 40 && G == 2) {
+                                D += 2
+                            };
+
+                            if(map["w"] && D < 50 && G == 3) {
+                                D += 3
+                            };
+
+                            if(map["w"] && D < 60 && G == 4) {
+                                D += 4
+                            };
+
+                            if(map["w"] && D < 80 && G == 5) {
                                 D += 5
-                            };
-
-                            if(map["w"] && D < 30 && G == 3) {
-                                D += 10
-                            };
-
-                            if(map["w"] && D < 50 && G == 4) {
-                                D += 25
-                            };
-
-                            if(map["w"] && D < 100 && G == 5) {
-                                D += 50
                             };
 
                             // Handbrake
