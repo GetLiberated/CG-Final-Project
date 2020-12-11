@@ -50,7 +50,7 @@
                         bodyMaterial.diffuseColor = new BABYLON.Color3(1.0, 0.25, 0.25);
                         bodyMaterial.backFaceCulling = false;
 
-                        var car = new BABYLON.SceneLoader.ImportMesh('', "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
+                        new BABYLON.SceneLoader.ImportMesh("", "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
                             obj.forEach((object, index) => {
                                 object.position = new BABYLON.Vector3(0, 0, 60);
                                 object.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02);
@@ -61,6 +61,7 @@
                                 // object.material = mat;
                             });
                         });
+                        let car = scene.getMeshByName("car");
                         
                         //Array of points for trapezium side of car.
                         var side = [new BABYLON.Vector3(-6.5, 1.5, -2),
@@ -204,6 +205,8 @@
                     var phi; //rotation of car when turning 
                     
                     var F; // frames per second	
+
+                    var G = 1; // gigi
                     
                     /****************************End Variables************************************************/
                     
@@ -213,13 +216,54 @@
                         
                         scene.registerAfterRender(function() {	
                             F = engine.getFps();
-                            
-                            if(map[" "] && D < 15 ) {
-                                D += 1;		
+
+                            if(map["1"]) {
+                                G = 1	
+                            };
+
+                            if(map["2"]) {
+                                G = 2	
+                            };
+
+                            if(map["3"]) {
+                                G = 3	
+                            };
+
+                            if(map["4"]) {
+                                G = 4	
+                            };
+
+                            if(map["5"]) {
+                                G = 5	
                             };
                             
+                            if(map["w"] && D < 30 && G == 1) {
+                                D += 1	
+                            };
+
+                            if(map["w"] && D < 30 && G == 2) {
+                                D += 5
+                            };
+
+                            if(map["w"] && D < 30 && G == 3) {
+                                D += 10
+                            };
+
+                            if(map["w"] && D < 50 && G == 4) {
+                                D += 25
+                            };
+
+                            if(map["w"] && D < 100 && G == 5) {
+                                D += 50
+                            };
+
+                            if(map[" "] && D > 0) {
+                                D -= 1.2
+                            };
+                            
+                            // Acceleration when not thrusting
                             if(D > 0.15) {
-                                D -= 0.15;
+                                D -= 0.1;
                             } 
                             else {
                                 D = 0;
