@@ -52,8 +52,8 @@
 
                         new BABYLON.SceneLoader.ImportMesh("", "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
                             obj.forEach((object, index) => {
-                                object.position = new BABYLON.Vector3(0, 0, 60);
-                                object.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02);
+                                object.position = new BABYLON.Vector3(0, 0, 0);
+                                object.scaling = new BABYLON.Vector3(0.005, 0.005, 0.005);
                                 // object.rotation = new BABYLON.Vector3(0, 0, 0)
 
                                 // let mat = new BABYLON.StandardMaterial('mat', scene);
@@ -265,14 +265,14 @@
                             if(D > 0.15) {
                                 D -= 0.1;
                             } 
-                            else {
-                                D = 0;
-                            }
+                            // else {
+                            //     D = 0;
+                            // }
                                         
                             distance = D/F;
                             psi = D/(r * F);
                             
-                            if((map["a"] || map["A"]) && -Math.PI/6 < theta) {
+                            if((map["a"] || map["A"]) && -Math.PI/8 < theta) {
                                 deltaTheta = -Math.PI/252;
                                 theta += deltaTheta;
                                 pivotFI.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
@@ -290,7 +290,7 @@
                                                         
                             };
                                 
-                            if((map["d"] || map["D"])  && theta < Math.PI/6) {
+                            if((map["d"] || map["D"])  && theta < Math.PI/8) {
                                 deltaTheta = Math.PI/252;
                                 theta += deltaTheta;
                                 pivotFI.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
@@ -306,6 +306,30 @@
                                 carBody.translate(BABYLON.Axis.Z, R - NR, BABYLON.Space.LOCAL);
                                 R = NR;
                                         
+                            };
+
+                            if(map["s"]) {
+                                D = -10
+                                phi = D/(R * F);
+                                if(Math.abs(theta)<0) {	 
+                                    pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
+                                    psiRI = D/(r * F);
+                                    psiRO = D * (R + A)/(r * F);
+                                    psiFI = D * Math.sqrt(R* R + L * L)/(r * F);
+                                    psiFO = D * Math.sqrt((R + A) * (R + A) + L * L)/(r * F);
+                                
+                                    wheelFI.rotate(BABYLON.Axis.Y, psiFI, BABYLON.Space.LOCAL); 
+                                    wheelFO.rotate(BABYLON.Axis.Y, psiFO, BABYLON.Space.LOCAL);
+                                    wheelRI.rotate(BABYLON.Axis.Y, psiRI, BABYLON.Space.LOCAL);
+                                    wheelRO.rotate(BABYLON.Axis.Y, psiRO, BABYLON.Space.LOCAL);
+                                }
+                                else {
+                                    pivot.translate(BABYLON.Axis.X, -distance, BABYLON.Space.LOCAL);
+                                    wheelFI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL); 
+                                    wheelFO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                    wheelRI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                    wheelRO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                }
                             };
                             
                             if(D > 0) {
