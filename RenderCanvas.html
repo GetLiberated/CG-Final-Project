@@ -23,9 +23,6 @@
     </head>
     <body>
         <canvas id ="canvas"></canvas>
-        <div id=“lcContainer”>
-            <ul id=“listColliders”></ul>
-        </div>
         <script>
             window.addEventListener("DOMContentLoaded", function(){
                 var canvas = document.getElementById("canvas");
@@ -83,6 +80,7 @@
                             // object.material = mat;
                         });
                     });
+
                     /*-----------------------End Car Body------------------------------------------*/
                     
                     /*-----------------------Wheel------------------------------------------*/ 
@@ -148,13 +146,6 @@
                     /*************************** End Car*********************************************/
                     
                     /*****************************Map********************************************/
-                    // var groundSize = 400;
-                    
-                    // var ground = BABYLON.MeshBuilder.CreateGround("ground", {width: groundSize, height: groundSize}, scene);
-                    // var groundMaterial = new BABYLON.StandardMaterial("ground", scene);
-                    // groundMaterial.diffuseColor = new BABYLON.Color3(0.75, 1, 0.25);
-                    // ground.material = groundMaterial;
-                    // ground.position.y = -1.5;
 
                     let mapMesh;
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Objects Real.obj", scene, (obj) => {
@@ -163,8 +154,8 @@
                             object.position = new BABYLON.Vector3(0, 0, 0)
                             object.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
                             object.rotation = new BABYLON.Vector3(0, 0, 0)
-
-                            if(carBody.intersectsMesh(object, true)){
+                            
+                            if (carBody.intersectsMesh(object, true)) {
                                 console.log(object.name)
                                 // carBody.position.copyFrom(lastPosition)
                             }
@@ -184,6 +175,7 @@
                     /*****************************End Map********************************************/ 
                     
                     /*****************************Skybox********************************************/ 
+
                     let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500}, scene)
                     let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
                     skyboxMaterial.backFaceCulling = false
@@ -197,16 +189,16 @@
                     scene.fogMode = BABYLON.Scene.FOGMODE_EXP
                     scene.fogDensity = 0.002
                     scene.fogColor = new BABYLON.Color3(0.7, 0.7, 1)
+
                     /*****************************End Skybox********************************************/
                     
                     /****************************Key Controls************************************************/
                     
-                    var map ={}; //object for multiple key presses
+                    var map = {}; //object for multiple key presses
                     scene.actionManager = new BABYLON.ActionManager(scene);
                     
                     scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {								
                             map[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-                            
                         }));
                         
                     scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {								
@@ -214,7 +206,6 @@
                         }));	
                         
                     /****************************End Key Controls************************************************/
-                    
                     
                     /****************************Variables************************************************/
                     
@@ -234,8 +225,6 @@
                     var G = 1; // gear
                     
                     /****************************End Variables************************************************/
-                    
-
                     
                     /****************************Animation******************************************************/	
                     
@@ -414,116 +403,6 @@
                     })
                 });
             });
-
-            function CreateCollidersHTMLList() {
-
-                var listColliders = document.getElementById('listColliders');
-
-                for (var j = 0; j < meshesColliderList.length; j++) {
-
-                    var newLi = document.createElement('li');
-
-                    var chkVisibility = document.createElement('input');
-
-                    chkVisibility.type = 'checkbox';
-
-                    chkVisibility.name = meshesColliderList[j].name;
-
-                    chkVisibility.id = 'colvis' + j;
-
-                    var chkPhysics = document.createElement('input');
-
-                    chkPhysics.type = 'checkbox';
-
-                    chkPhysics.name = meshesColliderList[j].name;
-
-                    chkPhysics.id = 'colphysx' + j;
-
-                    (function (j) {
-
-                        chkVisibility.addEventListener(
-
-                        'click',
-
-                        function (event) {
-
-                            onChangeVisibility(j, event);
-
-                        },
-
-                        false
-
-                        );
-
-                        chkPhysics.addEventListener(
-
-                        'click',
-
-                        function (event) {
-
-                            onChangePhysics(j, event);
-
-                        },
-
-                        false
-
-                        );
-
-                    })(j)
-
-                    newLi.textContent = meshesColliderList[j].name + ' visibility/physx ';
-
-                    newLi.appendChild(chkVisibility);
-
-                    newLi.appendChild(chkPhysics);
-
-                    listColliders.appendChild(newLi);
-
-                }
-
-                function onChangeVisibility(id, event) {
-
-                    if (!meshesColliderList[id].isVisible) {
-
-                        meshesColliderList[id].isVisible = true;
-
-                        meshesColliderList[id].material.alpha = 0.75;
-
-                        meshesColliderList[id].material.ambientColor.r = 1;
-
-                    }
-
-                    else {
-
-                        meshesColliderList[id].isVisible = false;
-
-                    }
-
-                }
-
-                function onChangePhysics(id, event) {
-
-                    if (!meshesColliderList[id].checkCollisions) {
-
-                        meshesColliderList[id].checkCollisions = true;
-
-                        meshesColliderList[id].setPhysicsState(BABYLON.PhysicsEngine.BoxImpostor, { mass: 0, 
-
-                                                                friction: 0.5, restitution: 0.7 });
-
-                    }
-
-                    else {
-
-                        meshesColliderList[id].checkCollisions = false;
-
-                        meshesColliderList[id].setPhysicsState(BABYLON.PhysicsEngine.NoImpostor);
-
-                    }
-
-                }
-
-            }
         </script>
     </body>
 </html>
