@@ -50,19 +50,6 @@
                         bodyMaterial.diffuseColor = new BABYLON.Color3(1.0, 0.25, 0.25);
                         bodyMaterial.backFaceCulling = false;
 
-                        new BABYLON.SceneLoader.ImportMesh("", "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
-                            obj.forEach((object, index) => {
-                                object.position = new BABYLON.Vector3(0, 0, 0);
-                                object.scaling = new BABYLON.Vector3(0.005, 0.005, 0.005);
-                                // object.rotation = new BABYLON.Vector3(0, 0, 0)
-
-                                // let mat = new BABYLON.StandardMaterial('mat', scene);
-                                // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
-                                // object.material = mat;
-                            });
-                        });
-                        let car = scene.getMeshByName("car");
-                        
                         //Array of points for trapezium side of car.
                         var side = [new BABYLON.Vector3(-6.5, 1.5, -2),
                                     new BABYLON.Vector3(2.5, 1.5, -2),
@@ -78,7 +65,25 @@
                         //Create body and apply material
                         var carBody = BABYLON.MeshBuilder.ExtrudeShape("body", {shape: side, path: extrudePath, cap : BABYLON.Mesh.CAP_ALL}, scene);
                         carBody.material = bodyMaterial;
+                        carBody.checkCollisions = true
                         camera.parent = carBody;
+
+                        let car;
+                        new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
+                            car = obj;
+                            obj.forEach((object, index) => {
+                                object.parent = carBody
+                                object.position = new BABYLON.Vector3(-2, -1, 0)
+                                object.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
+                                object.rotation = new BABYLON.Vector3(0, 0, 0)
+
+                                // let mat = new BABYLON.StandardMaterial('mat', scene);
+                                // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
+                                // object.material = mat;
+
+                                object.checkCollisions = true
+                            });
+                        });
                         /*-----------------------End Car Body------------------------------------------*/
                         
                         /*-----------------------Wheel------------------------------------------*/ 
@@ -206,7 +211,7 @@
                     
                     var F; // frames per second	
 
-                    var G = 1; // gigi
+                    var G = 1; // gear
                     
                     /****************************End Variables************************************************/
                     
@@ -217,6 +222,7 @@
                         scene.registerAfterRender(function() {	
                             F = engine.getFps();
 
+                            /***************Switch Gear****************/
                             if(map["1"]) {
                                 G = 1	
                             };
@@ -236,6 +242,7 @@
                             if(map["5"]) {
                                 G = 5	
                             };
+                            /***************End Switch Gear****************/
                             
                             if(map["w"] && D < 30 && G == 1) {
                                 D += 1	
@@ -257,6 +264,7 @@
                                 D += 50
                             };
 
+                            // Handbrake
                             if(map[" "] && D > 0) {
                                 D -= 1.2
                             };
