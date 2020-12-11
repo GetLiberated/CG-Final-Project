@@ -184,7 +184,7 @@
                     /*****************************End Map********************************************/ 
                     
                     /*****************************Skybox********************************************/ 
-                    let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:250}, scene)
+                    let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500}, scene)
                     let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
                     skyboxMaterial.backFaceCulling = false
                     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skybox/skybox", scene)
@@ -195,8 +195,8 @@
                     skybox.material = skyboxMaterial
 
                     scene.fogMode = BABYLON.Scene.FOGMODE_EXP
-                    scene.fogDensity = 0.01
-                    scene.fogColor = new BABYLON.Color3(0.9, 0.9, 0.85)
+                    scene.fogDensity = 0.002
+                    scene.fogColor = new BABYLON.Color3(0.7, 0.7, 1)
                     /*****************************End Skybox********************************************/
                     
                     /****************************Key Controls************************************************/
@@ -286,19 +286,19 @@
 
                         // Handbrake
                         if(map[" "] && D > 0) {
-                            D -= 1.2
+                            D -= 1.5
                         };
                         
                         // Acceleration when not thrusting
                         if(D > 0.15) {
                             D -= 0.1;
                         } 
-                        else if (D < 0.15) {
+                        else if (D < -0.15) {
                             D += 0.1;
                         }
-                        else {
-                            D = 0;
-                        }
+                        // else {
+                        //     D = 0;
+                        // }
                                     
                         distance = D/F;
                         psi = D/(r * F);
@@ -339,10 +339,13 @@
                                     
                         };
 
-                        if(map["s"]) {
+                        if(map["s"] && D > -30 ) {
                             D -= 1
+                        };
+                        
+                        if(D > 0) {
                             phi = D/(R * F);
-                            if(Math.abs(theta)<0) {	 
+                            if(Math.abs(theta)>0) {	 
                                 pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
                                 psiRI = D/(r * F);
                                 psiRO = D * (R + A)/(r * F);
@@ -361,11 +364,11 @@
                                 wheelRI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
                                 wheelRO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
                             }
-                        };
-                        
-                        if(D > 0) {
+                        }
+
+                        if (D < 0) {
                             phi = D/(R * F);
-                            if(Math.abs(theta)>0) {	 
+                            if(Math.abs(theta)<0) {	 
                                 pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
                                 psiRI = D/(r * F);
                                 psiRO = D * (R + A)/(r * F);
