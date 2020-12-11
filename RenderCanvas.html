@@ -7,9 +7,17 @@
             <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
             <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
             <style>
-                #canvas{
-                    width:100%;
-                    height:100%;
+                html,body {
+                    overflow: hidden;
+                    width: 100%;
+                    height: 100%;
+                    margin: 0;
+                    padding: 0;
+                }
+                #canvas {
+                    width: 100%;
+                    height: 100%;
+                    touch-action: none;
                 }
             </style>
     </head>
@@ -26,7 +34,7 @@
 
                         // camera
                         var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
-                        camera.setPosition(new BABYLON.Vector3(11.5, 3.5, 0));	  
+                        camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
                         
                         // lights
                         var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
@@ -41,6 +49,18 @@
                         var bodyMaterial = new BABYLON.StandardMaterial("body_mat", scene);
                         bodyMaterial.diffuseColor = new BABYLON.Color3(1.0, 0.25, 0.25);
                         bodyMaterial.backFaceCulling = false;
+
+                        var car = new BABYLON.SceneLoader.ImportMesh('', "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
+                            obj.forEach((object, index) => {
+                                object.position = new BABYLON.Vector3(0, 0, 60);
+                                object.scaling = new BABYLON.Vector3(0.02, 0.02, 0.02);
+                                // object.rotation = new BABYLON.Vector3(0, 0, 0)
+
+                                // let mat = new BABYLON.StandardMaterial('mat', scene);
+                                // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
+                                // object.material = mat;
+                            });
+                        });
                         
                         //Array of points for trapezium side of car.
                         var side = [new BABYLON.Vector3(-6.5, 1.5, -2),
@@ -64,7 +84,7 @@
                         
                         //Wheel Material 
                         var wheelMaterial = new BABYLON.StandardMaterial("wheel_mat", scene);
-                        var wheelTexture = new BABYLON.Texture("wheelTexture.png", scene);
+                        var wheelTexture = new BABYLON.Texture("assets/wheelTexture.png", scene);
                         wheelMaterial.diffuseTexture = wheelTexture;
                         
                         //Set color for wheel tread as black
@@ -278,6 +298,9 @@
                         // scene.getMeshByName("Box").position.z += 0.01;
                         scene.render();
                     });
+                    window.addEventListener("resize", () => {
+                        engine.resize()
+                    })
                 });
             </script>
     </body>
