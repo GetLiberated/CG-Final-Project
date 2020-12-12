@@ -75,6 +75,7 @@
                     
                     var car = createCar()
                     camera.parent = car;
+                    let startRotation = car.rotationQuaternion.clone();
 
                     let carCollider;
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
@@ -237,9 +238,12 @@
                         image.isVisible = false
                         text1.isVisible = false
                         button.isVisible = false
+                        mf = false;
+                        mb = false;
+                        rl = false;
+                        rr = false;
                         car.position = new BABYLON.Vector3.Zero()
-                        car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
-                        car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
+                        car.rotationQuaternion = startRotation.clone();
                         camera.parent = car
                         lose = false
                     });
@@ -365,10 +369,6 @@
                                     text1.isVisible = true
                                     button.isVisible = true
                                     camera.parent = null
-                                    mf = false;
-                                    mb = false;
-                                    rl = false;
-                                    rr = false;
                                     car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
                                     car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
                                     lose = true
