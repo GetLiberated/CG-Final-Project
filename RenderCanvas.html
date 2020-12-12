@@ -52,6 +52,7 @@
                     var bodyMaterial = new BABYLON.StandardMaterial("body_mat", scene);
                     bodyMaterial.diffuseColor = new BABYLON.Color3(1.0, 0.25, 0.25);
                     bodyMaterial.backFaceCulling = false;
+                    bodyMaterial.alpha = 0
 
                     //Array of points for trapezium side of car.
                     var side = [new BABYLON.Vector3(-6.5, 1.5, -2),
@@ -76,7 +77,7 @@
                         carCollider = meshes[13];
                         meshes.forEach((mesh, index) => {
                             mesh.parent = carBody
-                            mesh.position = new BABYLON.Vector3(-2, -1, 0)
+                            mesh.position = new BABYLON.Vector3(-2, 0, 0)
                             mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
 
@@ -130,18 +131,18 @@
                     /*------------Create other Wheels as Instances, Parent and Position----------*/
                     var wheelFO = wheelFI.createInstance("FO");
                     wheelFO.parent = pivotFO;
-                    wheelFO.position = new BABYLON.Vector3(0, 0, 1.8);
+                    wheelFO.position = new BABYLON.Vector3(0, 1, 1.8);
                     
                     var wheelRI = wheelFI.createInstance("RI");
                     wheelRI.parent = carBody;
-                    wheelRI.position = new BABYLON.Vector3(3, 0, -2.8);
+                    wheelRI.position = new BABYLON.Vector3(3, 1, -2.8);
                     
                     var wheelRO = wheelFI.createInstance("RO");
                     wheelRO.parent = carBody;
-                    wheelRO.position = new BABYLON.Vector3(3, 0, 2.8);
+                    wheelRO.position = new BABYLON.Vector3(3, 1, 2.8);
                     
                     wheelFI.parent = pivotFI;
-                    wheelFI.position = new BABYLON.Vector3(0, 0, -1.8);
+                    wheelFI.position = new BABYLON.Vector3(0, 1, -1.8);
                     /*------------End Create other Wheels as Instances, Parent and Position----------*/
                     
                     /*---------------------Create Car Centre of Rotation-----------------------------*/
@@ -202,6 +203,65 @@
                     scene.fogColor = new BABYLON.Color3(0.7, 0.7, 1)
 
                     /*****************************End Skybox********************************************/
+
+                    /*********Animations*************/
+
+                    var frameRate = 20
+
+                    //for camera to sweep round
+                    var rotate = new BABYLON.Animation("rotate", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    
+                    var rotate_keys = []; 
+
+                    rotate_keys.push({
+                        frame: 0,
+                        value: 0
+                    });
+
+                    rotate_keys.push({
+                        frame: 9 * frameRate,
+                        value: 0
+                    });
+
+                    rotate_keys.push({
+                        frame: 14 * frameRate,
+                        value: Math. PI
+                    });
+
+                    rotate.setKeys(rotate_keys);
+                    
+                    //for camera move forward
+                    var movein = new BABYLON.Animation("movein", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    
+                    var movein_keys = []; 
+
+                    movein_keys.push({
+                        frame: 0,
+                        value: new BABYLON.Vector3(0, 5, -30)
+                    });
+
+                    movein_keys.push({
+                        frame: 3 * frameRate,
+                        value: new BABYLON.Vector3(0, 2, -10)
+                    });
+
+                    movein_keys.push({
+                        frame: 5 * frameRate,
+                        value: new BABYLON.Vector3(0, 2, -10)
+                    });
+
+                    movein_keys.push({
+                        frame: 8 * frameRate,
+                        value: new BABYLON.Vector3(-2, 2, 3)
+                    });
+
+                    movein.setKeys(movein_keys);
+
+                    /*******Run Clips**********/
+
+                    scene.beginDirectAnimation(camera, [movein, rotate], 0, 25 * frameRate, false);
+
+                    /*********End Animations*************/
 
                     /*****************************GUI********************************************/ 
 
