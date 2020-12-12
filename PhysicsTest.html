@@ -33,10 +33,12 @@
 
                     // Enable physics
                     scene.enablePhysics(null, new BABYLON.OimoJSPlugin());
+                    scene.collisionsEnabled = true;
 
                     // camera
                     var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
                     camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
+                    camera.checkCollisions = true;
                     
                     // lights
                     var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
@@ -49,6 +51,7 @@
                     var bodyMaterial = new BABYLON.StandardMaterial("body_mat", scene);
                     bodyMaterial.diffuseColor = new BABYLON.Color3(1.0, 0.25, 0.25);
                     bodyMaterial.backFaceCulling = false;
+                    bodyMaterial.alpha = 0
 
                     //Array of points for trapezium side of car.
                     var side = [new BABYLON.Vector3(-6.5, 1.5, -2),
@@ -73,7 +76,7 @@
                         carCollider = meshes[13];
                         meshes.forEach((mesh, index) => {
                             mesh.parent = carBody
-                            mesh.position = new BABYLON.Vector3(-2, -1, 0)
+                            mesh.position = new BABYLON.Vector3(-2, 0, 0)
                             mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
 
@@ -113,6 +116,7 @@
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
                             // mesh.showBoundingBox = true;
                             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+                            mesh.checkCollisions = true;
                         });
                     });
 

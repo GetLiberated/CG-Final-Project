@@ -6,6 +6,7 @@
         <script src="https://cdn.babylonjs.com/babylon.js"></script>
         <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
         <!-- <script src="https://cdn.babylonjs.com/Oimo.js"></script> -->
+        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
         <style>
             html,body {
                 overflow: hidden;
@@ -201,6 +202,41 @@
                     scene.fogColor = new BABYLON.Color3(0.7, 0.7, 1)
 
                     /*****************************End Skybox********************************************/
+
+                    /*****************************GUI********************************************/ 
+
+                    var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+
+                    var image = new BABYLON.GUI.Image("", "./assets/black.png");
+                    image.alpha = 0.5
+                    image.isVisible = false
+                    gui.addControl(image);    
+
+                    var text1 = new BABYLON.GUI.TextBlock();
+                    text1.text = "You died";
+                    text1.color = "white";
+                    text1.fontSize = 80;
+                    text1.top = "-100px"
+                    text1.isVisible = false
+                    gui.addControl(text1); 
+
+                    var button = BABYLON.GUI.Button.CreateSimpleButton("", "Retry");
+                    button.width = 0.2;
+                    button.height = "40px";
+                    button.color = "white";
+                    button.background = "red";
+                    button.isVisible = false
+                    button.onPointerClickObservable.add(function () {
+                        image.isVisible = false
+                        text1.isVisible = false
+                        button.isVisible = false
+                        carBody.position = BABYLON.Vector3.Zero()
+                        carBody.rotation = BABYLON.Vector3.Zero()
+                        lose = false
+                    });
+                    gui.addControl(button); 
+
+                    /*****************************End GUI********************************************/
                     
                     /****************************Key Controls************************************************/
                     
@@ -233,158 +269,163 @@
                     var F; // frames per second	
 
                     var G = 1; // gear
+
+                    var lose = false
                     
                     /****************************End Variables************************************************/
                     
                     /****************************Animation******************************************************/	
                     
                     scene.registerAfterRender(function() {	
-                        F = engine.getFps();
+                        if (!lose) {
 
-                        /***************Switch Gear****************/
-                        if(map["1"]) {
-                            G = 1	
-                        };
+                            F = engine.getFps();
 
-                        if(map["2"]) {
-                            G = 2	
-                        };
+                            /***************Switch Gear****************/
+                            if(map["1"]) {
+                                G = 1	
+                            };
 
-                        if(map["3"]) {
-                            G = 3	
-                        };
+                            if(map["2"]) {
+                                G = 2	
+                            };
 
-                        if(map["4"]) {
-                            G = 4	
-                        };
+                            if(map["3"]) {
+                                G = 3	
+                            };
 
-                        if(map["5"]) {
-                            G = 5	
-                        };
-                        /***************End Switch Gear****************/
-                        
-                        if(map["w"] && D < 30 && G == 1) {
-                            D += 1	
-                        };
+                            if(map["4"]) {
+                                G = 4	
+                            };
 
-                        if(map["w"] && D < 40 && G == 2) {
-                            D += 2
-                        };
-
-                        if(map["w"] && D < 50 && G == 3) {
-                            D += 3
-                        };
-
-                        if(map["w"] && D < 60 && G == 4) {
-                            D += 4
-                        };
-
-                        if(map["w"] && D < 80 && G == 5) {
-                            D += 5
-                        };
-
-                        // Handbrake
-                        if(map[" "] && D > 0) {
-                            D -= 1.5
-                        };
-                        
-                        // Acceleration when not thrusting
-                        if(D > 0.15) {
-                            D -= 0.1;
-                        } 
-                        else if (D < -0.15) {
-                            D += 0.1;
-                        }
-                        // else {
-                        //     D = 0;
-                        // }
-                                    
-                        distance = D/F;
-                        psi = D/(r * F);
-                        
-                        if((map["a"] || map["A"]) && -Math.PI/8 < theta) {
-                            deltaTheta = -Math.PI/252;
-                            theta += deltaTheta;
-                            pivotFI.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
-                            pivotFO.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
-                            if(Math.abs(theta) > 0.00000001) {
-                                NR = A/2 +L/Math.tan(theta);	
-                            }
-                            else {
-                                theta = 0;
-                                NR = 0;
-                            }
-                            pivot.translate(BABYLON.Axis.Z, NR - R, BABYLON.Space.LOCAL);
-                            carBody.translate(BABYLON.Axis.Z, R - NR, BABYLON.Space.LOCAL);
-                            R = NR;
-                                                    
-                        };
+                            if(map["5"]) {
+                                G = 5	
+                            };
+                            /***************End Switch Gear****************/
                             
-                        if((map["d"] || map["D"])  && theta < Math.PI/8) {
-                            deltaTheta = Math.PI/252;
-                            theta += deltaTheta;
-                            pivotFI.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
-                            pivotFO.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
-                            if(Math.abs(theta) > 0.00000001) {
-                                NR = A/2 +L/Math.tan(theta);	
-                            }
-                            else {
-                                theta = 0;
-                                NR = 0;
-                            }
-                            pivot.translate(BABYLON.Axis.Z, NR - R, BABYLON.Space.LOCAL);
-                            carBody.translate(BABYLON.Axis.Z, R - NR, BABYLON.Space.LOCAL);
-                            R = NR;
-                                    
-                        };
+                            if(map["w"] && D < 30 && G == 1) {
+                                D += 1	
+                            };
 
-                        if(map["s"] && D > -30 ) {
-                            D -= 1
-                        };
-                        
-                        if(D > 0) {
-                            phi = D/(R * F);
-                            if(Math.abs(theta)>0) {	 
-                                pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
-                                psiRI = D/(r * F);
-                                psiRO = D * (R + A)/(r * F);
-                                psiFI = D * Math.sqrt(R* R + L * L)/(r * F);
-                                psiFO = D * Math.sqrt((R + A) * (R + A) + L * L)/(r * F);
-                            
-                                wheelFI.rotate(BABYLON.Axis.Y, psiFI, BABYLON.Space.LOCAL); 
-                                wheelFO.rotate(BABYLON.Axis.Y, psiFO, BABYLON.Space.LOCAL);
-                                wheelRI.rotate(BABYLON.Axis.Y, psiRI, BABYLON.Space.LOCAL);
-                                wheelRO.rotate(BABYLON.Axis.Y, psiRO, BABYLON.Space.LOCAL);
-                            }
-                            else {
-                                pivot.translate(BABYLON.Axis.X, -distance, BABYLON.Space.LOCAL);
-                                wheelFI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL); 
-                                wheelFO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
-                                wheelRI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
-                                wheelRO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
-                            }
-                        }
+                            if(map["w"] && D < 40 && G == 2) {
+                                D += 2
+                            };
 
-                        if (D < 0) {
-                            phi = D/(R * F);
-                            if(Math.abs(theta)<0) {	 
-                                pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
-                                psiRI = D/(r * F);
-                                psiRO = D * (R + A)/(r * F);
-                                psiFI = D * Math.sqrt(R* R + L * L)/(r * F);
-                                psiFO = D * Math.sqrt((R + A) * (R + A) + L * L)/(r * F);
+                            if(map["w"] && D < 50 && G == 3) {
+                                D += 3
+                            };
+
+                            if(map["w"] && D < 60 && G == 4) {
+                                D += 4
+                            };
+
+                            if(map["w"] && D < 80 && G == 5) {
+                                D += 5
+                            };
+
+                            // Handbrake
+                            if(map[" "] && D > 0) {
+                                D -= 1.5
+                            };
                             
-                                wheelFI.rotate(BABYLON.Axis.Y, psiFI, BABYLON.Space.LOCAL); 
-                                wheelFO.rotate(BABYLON.Axis.Y, psiFO, BABYLON.Space.LOCAL);
-                                wheelRI.rotate(BABYLON.Axis.Y, psiRI, BABYLON.Space.LOCAL);
-                                wheelRO.rotate(BABYLON.Axis.Y, psiRO, BABYLON.Space.LOCAL);
+                            // Acceleration when not thrusting
+                            if(D > 0.15) {
+                                D -= 0.1;
+                            } 
+                            else if (D < -0.15) {
+                                D += 0.1;
                             }
-                            else {
-                                pivot.translate(BABYLON.Axis.X, -distance, BABYLON.Space.LOCAL);
-                                wheelFI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL); 
-                                wheelFO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
-                                wheelRI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
-                                wheelRO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                            // else {
+                            //     D = 0;
+                            // }
+                                        
+                            distance = D/F;
+                            psi = D/(r * F);
+                            
+                            if((map["a"] || map["A"]) && -Math.PI/8 < theta) {
+                                deltaTheta = -Math.PI/252;
+                                theta += deltaTheta;
+                                pivotFI.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
+                                pivotFO.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
+                                if(Math.abs(theta) > 0.00000001) {
+                                    NR = A/2 +L/Math.tan(theta);	
+                                }
+                                else {
+                                    theta = 0;
+                                    NR = 0;
+                                }
+                                pivot.translate(BABYLON.Axis.Z, NR - R, BABYLON.Space.LOCAL);
+                                carBody.translate(BABYLON.Axis.Z, R - NR, BABYLON.Space.LOCAL);
+                                R = NR;
+                                                        
+                            };
+                                
+                            if((map["d"] || map["D"])  && theta < Math.PI/8) {
+                                deltaTheta = Math.PI/252;
+                                theta += deltaTheta;
+                                pivotFI.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
+                                pivotFO.rotate(BABYLON.Axis.Y, deltaTheta, BABYLON.Space.LOCAL);
+                                if(Math.abs(theta) > 0.00000001) {
+                                    NR = A/2 +L/Math.tan(theta);	
+                                }
+                                else {
+                                    theta = 0;
+                                    NR = 0;
+                                }
+                                pivot.translate(BABYLON.Axis.Z, NR - R, BABYLON.Space.LOCAL);
+                                carBody.translate(BABYLON.Axis.Z, R - NR, BABYLON.Space.LOCAL);
+                                R = NR;
+                                        
+                            };
+
+                            if(map["s"] && D > -30 ) {
+                                D -= 1
+                            };
+                            
+                            if(D > 0) {
+                                phi = D/(R * F);
+                                if(Math.abs(theta)>0) {	 
+                                    pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
+                                    psiRI = D/(r * F);
+                                    psiRO = D * (R + A)/(r * F);
+                                    psiFI = D * Math.sqrt(R* R + L * L)/(r * F);
+                                    psiFO = D * Math.sqrt((R + A) * (R + A) + L * L)/(r * F);
+                                
+                                    wheelFI.rotate(BABYLON.Axis.Y, psiFI, BABYLON.Space.LOCAL); 
+                                    wheelFO.rotate(BABYLON.Axis.Y, psiFO, BABYLON.Space.LOCAL);
+                                    wheelRI.rotate(BABYLON.Axis.Y, psiRI, BABYLON.Space.LOCAL);
+                                    wheelRO.rotate(BABYLON.Axis.Y, psiRO, BABYLON.Space.LOCAL);
+                                }
+                                else {
+                                    pivot.translate(BABYLON.Axis.X, -distance, BABYLON.Space.LOCAL);
+                                    wheelFI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL); 
+                                    wheelFO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                    wheelRI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                    wheelRO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                }
+                            }
+
+                            if (D < 0) {
+                                phi = D/(R * F);
+                                if(Math.abs(theta)<0) {	 
+                                    pivot.rotate(BABYLON.Axis.Y, phi, BABYLON.Space.WORLD);
+                                    psiRI = D/(r * F);
+                                    psiRO = D * (R + A)/(r * F);
+                                    psiFI = D * Math.sqrt(R* R + L * L)/(r * F);
+                                    psiFO = D * Math.sqrt((R + A) * (R + A) + L * L)/(r * F);
+                                
+                                    wheelFI.rotate(BABYLON.Axis.Y, psiFI, BABYLON.Space.LOCAL); 
+                                    wheelFO.rotate(BABYLON.Axis.Y, psiFO, BABYLON.Space.LOCAL);
+                                    wheelRI.rotate(BABYLON.Axis.Y, psiRI, BABYLON.Space.LOCAL);
+                                    wheelRO.rotate(BABYLON.Axis.Y, psiRO, BABYLON.Space.LOCAL);
+                                }
+                                else {
+                                    pivot.translate(BABYLON.Axis.X, -distance, BABYLON.Space.LOCAL);
+                                    wheelFI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL); 
+                                    wheelFO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                    wheelRI.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                    wheelRO.rotate(BABYLON.Axis.Y, psi, BABYLON.Space.LOCAL);
+                                }
                             }
                         }
                     });
@@ -393,8 +434,12 @@
 
                     scene.registerBeforeRender(function () {
                         mapMeshes.forEach((mesh, index) => {
-                            if (carCollider.intersectsMesh(mesh, true)) {
+                            if (carCollider.intersectsMesh(mesh, true) && !lose) {
                                 console.log(mesh.name)
+                                image.isVisible = true
+                                text1.isVisible = true
+                                button.isVisible = true
+                                lose = true
                             }
                         });
                     })
