@@ -5,7 +5,7 @@
         <title>Car Driving</title>
         <script src="https://cdn.babylonjs.com/babylon.js"></script>
         <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-        <script src="https://cdn.babylonjs.com/cannon.js"></script>
+        <!-- <script src="https://cdn.babylonjs.com/Oimo.js"></script> -->
         <style>
             html,body {
                 overflow: hidden;
@@ -30,6 +30,9 @@
 
                 var createScene = function() {
                     var scene = new BABYLON.Scene(engine);
+
+                    // Enable physics
+                    // scene.enablePhysics(null, new BABYLON.OimoJSPlugin());
 
                     // camera
                     var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
@@ -64,20 +67,26 @@
                     //Create body and apply material
                     var carBody = BABYLON.MeshBuilder.ExtrudeShape("body", {shape: side, path: extrudePath, cap : BABYLON.Mesh.CAP_ALL}, scene);
                     carBody.material = bodyMaterial;
+                    // carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1}, scene);
                     camera.parent = carBody;
 
-                    let car;
-                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (obj) => {
-                        car = obj;
-                        obj.forEach((object, index) => {
-                            object.parent = carBody
-                            object.position = new BABYLON.Vector3(-2, -1, 0)
-                            object.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
-                            object.rotation = new BABYLON.Vector3(0, 0, 0)
+                    let carCollider;
+                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
+                        carCollider = meshes[13];
+                        meshes.forEach((mesh, index) => {
+                            mesh.parent = carBody
+                            mesh.position = new BABYLON.Vector3(-2, -1, 0)
+                            mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
+                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
 
                             // let mat = new BABYLON.StandardMaterial('mat', scene);
                             // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
-                            // object.material = mat;
+                            // mesh.material = mat;
+
+                            if (index === 13) {
+                                mesh.checkCollisions = true;
+                                mesh.showBoundingBox = true;
+                            }
                         });
                     });
 
@@ -147,28 +156,29 @@
                     
                     /*****************************Map********************************************/
 
-                    let mapMesh;
-                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Objects Real.obj", scene, (obj) => {
-                        mapMesh = obj;
-                        obj.forEach((object, index) => {
-                            object.position = new BABYLON.Vector3(0, 0, 0)
-                            object.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
-                            object.rotation = new BABYLON.Vector3(0, 0, 0)
+                    let mapMeshes;
+                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Objects Real.obj", scene, (meshes) => {
+                        mapMeshes = meshes
+                        meshes.forEach((mesh, index) => {
+                            mesh.position = new BABYLON.Vector3(0, 0, 0)
+                            mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
+                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
                             
-                            if (carBody.intersectsMesh(object, true)) {
-                                console.log(object.name)
-                                // carBody.position.copyFrom(lastPosition)
-                            }
+                            mesh.checkCollisions = true;
+                            mesh.showBoundingBox = true;
+                            // mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
                         });
                     });
 
-                    let road;
-                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Road.obj", scene, (obj) => {
-                        road = obj;
-                        obj.forEach((object, index) => {
-                            object.position = new BABYLON.Vector3(0, 0, 0)
-                            object.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
-                            object.rotation = new BABYLON.Vector3(0, 0, 0)
+                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Road.obj", scene, (meshes) => {
+                        meshes.forEach((mesh, index) => {
+                            mesh.position = new BABYLON.Vector3(0, 0, 0)
+                            mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
+                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+                            // if (index === 0) {
+                                mesh.showBoundingBox = true;
+                                // mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+                            // }
                         });
                     });
 
@@ -381,6 +391,14 @@
                     
                     /****************************End Animation************************************************/
 
+                    scene.registerBeforeRender(function () {
+                        mapMeshes.forEach((mesh, index) => {
+                            if (carCollider.intersectsMesh(mesh, true)) {
+                                console.log(mesh.name)
+                            }
+                        });
+                    })
+
                     return scene;
                 }
 
@@ -388,9 +406,6 @@
 
                 // Wait for textures and shaders to be ready
                 scene.executeWhenReady(function () {
- 
-                    // Enable physics
-                    scene.enablePhysics();
 
                     // Once the scene is loaded, just register a render loop to render it
                     engine.runRenderLoop(function () {
@@ -402,6 +417,15 @@
                         engine.resize()
                     })
                 });
+
+                // object.actionManager = new BABYLON.ActionManager(scene);
+                // object.actionManager.registerAction(
+                //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
+                //         function(event) {
+                //             console.log(index);
+                //         }
+                //     )
+                // )
             });
         </script>
     </body>
