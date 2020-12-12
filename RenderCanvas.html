@@ -238,6 +238,8 @@
                         text1.isVisible = false
                         button.isVisible = false
                         car.position = new BABYLON.Vector3.Zero()
+                        car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
+                        car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
                         camera.parent = car
                         lose = false
                     });
@@ -254,7 +256,7 @@
                     };
 
                     var rotate = function (mesh, direction, power) {
-                        var maxRotation = 1.5;
+                        var maxRotation = 1.3;
                         // console.log("angular y: " + mesh.physicsImpostor.getAngularVelocity().y);
                         if (mesh.physicsImpostor.getAngularVelocity().y < -maxRotation) 
                             mesh.physicsImpostor.setAngularVelocity( new BABYLON.Vector3(mesh.physicsImpostor.getAngularVelocity().x,
@@ -271,10 +273,10 @@
                         );
                     }
 
-                    var translate = function (mesh, direction, power) {
+                    function translate (mesh, direction, power) {
                         // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
-                        if (mesh.physicsImpostor.getLinearVelocity().x < -55) 
-                            mesh.physicsImpostor.setLinearVelocity( new BABYLON.Vector3(-55,
+                        if (mesh.physicsImpostor.getLinearVelocity().x < -50) 
+                            mesh.physicsImpostor.setLinearVelocity( new BABYLON.Vector3(-50,
                                 mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z));
 
                         mesh.physicsImpostor.setLinearVelocity(
@@ -343,10 +345,10 @@
 
                     function update() {
                         if (mf == true) {
-                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1.5);
+                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1.7);
                         }
                         if (mb == true) {
-                            translate(car, new BABYLON.Vector3(1, 0, 0), 1.5);
+                            translate(car, new BABYLON.Vector3(1, 0, 0), 1.7);
                         }
                         if (rl == true) {
                             rotate(car, new BABYLON.Vector3(0, -1, 0), 0.05);
@@ -363,8 +365,12 @@
                                     text1.isVisible = true
                                     button.isVisible = true
                                     camera.parent = null
-                                    car.physicsImpostor.setLinearVelocity(BABYLON.Vector3.Zero());
-                                    car.physicsImpostor.setAngularVelocity(BABYLON.Vector3.Zero());
+                                    mf = false;
+                                    mb = false;
+                                    rl = false;
+                                    rr = false;
+                                    car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
+                                    car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
                                     lose = true
                                 }
                             });
