@@ -32,7 +32,10 @@
                 var createScene = function() {
                     var scene = new BABYLON.Scene(engine);
 
-                    // Enable physics
+                    // enable debug mode
+                    // scene.debugLayer.show()
+
+                    // enable physics
                     scene.enablePhysics(new BABYLON.Vector3(0,-32, 0), new BABYLON.OimoJSPlugin());
 
                     // camera
@@ -85,7 +88,6 @@
                     }
                     
                     var car = createCar()
-                    // camera.setTarget(car)
                     camera.parent = car;
                     let carStartRotation = car.rotationQuaternion.clone();
 
@@ -187,7 +189,8 @@
                                     break
                             }
 
-                            // Debug mode
+                            // mesh identifier
+
                             // mesh.showBoundingBox = true;
                             // mesh.actionManager = new BABYLON.ActionManager(scene);
                             // mesh.actionManager.registerAction(
@@ -386,10 +389,14 @@
 
                     function translate (mesh, direction, power) {
                         // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
+
+                        // limit forward velocity speed
                         if (mesh.physicsImpostor.getLinearVelocity().x < -50) 
                             mesh.physicsImpostor.setLinearVelocity(
                                 new BABYLON.Vector3( -50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
                             );
+
+                        // limit backward velocity speed
                         if (mesh.physicsImpostor.getLinearVelocity().x > 50) 
                             mesh.physicsImpostor.setLinearVelocity(
                                 new BABYLON.Vector3( 50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
@@ -406,18 +413,11 @@
 
                     /*****************************Input********************************************/
 
-                    var mf = false;
-                    var mb = false;
-                    var rl = false;
-                    var rr = false;
+                    var mf = false; // move forward
+                    var mb = false; // move backward
+                    var rl = false; // rotate left
+                    var rr = false; // rotate right
                     var brake = false
-                    
-                    var oKeyBoard = {
-                        bPressRight: false,
-                        bPressLeft: false,
-                        bPressUp: false,
-                        bPressDown: false
-                    };
 
                     var left_indicator_turned_on = false;
                     var left_indicator;
@@ -525,7 +525,7 @@
                         fail = false
                     }
 
-                    function lose() {
+                    function lose() { // called when player failed to achieve the objective
                         // show lose screen
                         image.isVisible = true
                         text1.isVisible = true
@@ -539,7 +539,8 @@
 
                     var state = 0
 
-                    function blink(num) {
+                    function blink(num) { // called for blinking car light
+                        // reset material to prevent light getting stuck when stopping
                         carLights.forEach((array, index) => {
                             array.forEach((mesh, index) => {
                                 mesh.material = carLightStartMaterial
@@ -561,7 +562,8 @@
                         }
                     }
 
-                    function update() {
+                    function update() { // function for codes that needs constant loop
+                        // add thrust to car physics
                         if (mf == true) {
                             translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
                             carWheels[0].forEach((mesh, index) => {
