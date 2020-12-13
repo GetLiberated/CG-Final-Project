@@ -48,6 +48,12 @@
                     var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
                     var light2 = new BABYLON.HemisphericLight("light2", new BABYLON.Vector3(0, 1, 0), scene);
                     light2.intensity = 0.75;
+
+                    // glow layer
+                    var gl = new BABYLON.GlowLayer("glow", scene, { 
+                        mainTextureFixedSize: 1024,
+                        blurKernelSize: 64
+                    });
                     
                     /***************************Car*********************************************/
                     
@@ -83,7 +89,8 @@
                     camera.parent = car;
                     let carStartRotation = car.rotationQuaternion.clone();
 
-                    let carCollider;
+                    let carWheels = [[], []]
+                    let carLights = [[], []]
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
                         meshes.forEach((mesh, index) => {
                             mesh.parent = car
@@ -95,10 +102,102 @@
                             // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
                             // mesh.material = mat;
 
-                            if (index === 13) {
-                                // mesh.showBoundingBox = true;
-                                carCollider = mesh;
+                            switch (index) {
+                                case 13:
+                                    // mesh.dispose()
+                                    break
+
+                                // LF
+                                case 562:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 570:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 573:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+
+                                case 474:
+                                    carLightStartMaterial = mesh.material
+                                    carLights[0].push(mesh)
+                                    break
+                                case 506:
+                                    carLights[0].push(mesh)
+                                    break
+
+                                // RF
+                                case 542:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 553:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 594:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+
+                                case 462:
+                                    carLights[1].push(mesh)
+                                    break
+                                case 496:
+                                    carLights[1].push(mesh)
+                                    break
+
+                                // LB
+                                case 579:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 584:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 592:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+
+                                case 231:
+                                    carLights[0].push(mesh)
+                                    break
+
+                                // RB
+                                case 603:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 608:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 610:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+
+                                case 215:
+                                    carLights[1].push(mesh)
+                                    break
                             }
+
+                            // Debug mode
+                            // mesh.showBoundingBox = true;
+                            // mesh.actionManager = new BABYLON.ActionManager(scene);
+                            // mesh.actionManager.registerAction(
+                            //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
+                            //         function(event) {
+                            //             console.log(index);
+                            //             mesh.dispose()
+                            //         }
+                            //     )
+                            // )
                         });
                     });
                     
@@ -305,6 +404,12 @@
                         bPressUp: false,
                         bPressDown: false
                     };
+
+                    var left_indicator_turned_on = false;
+                    var left_indicator;
+                    var right_indicator_turned_on = false;
+                    var right_indicator;
+                    var carLightStartMaterial;
                     
                     window.addEventListener('keydown',function (e) {
                         if (!fail) {
@@ -325,6 +430,24 @@
                                     break;
                                 case 82://r
                                     restart()
+                                    break;
+                                case 81://q
+                                    right_indicator_turned_on = false
+                                    clearInterval(right_indicator)
+                                    if (!left_indicator_turned_on)
+                                        left_indicator = setInterval( function() { blink(0); }, 500 );
+                                    else
+                                        clearInterval(left_indicator)
+                                    left_indicator_turned_on = !left_indicator_turned_on
+                                    break;
+                                case 69://e
+                                    left_indicator_turned_on = false
+                                    clearInterval(left_indicator)
+                                    if (!right_indicator_turned_on)
+                                        right_indicator = setInterval( function() { blink(1); }, 500 );
+                                    else
+                                        clearInterval(right_indicator)
+                                    right_indicator_turned_on = !right_indicator_turned_on
                                     break;
                             }
                         }
@@ -348,6 +471,10 @@
                                 case 32://space
                                     break;
                                 case 82://r
+                                    break;
+                                case 81://q
+                                    break;
+                                case 69://e
                                     break;
                             }
                         }
@@ -394,9 +521,36 @@
                         fail = true
                     }
 
+                    var state = 0
+
+                    function blink(num) {
+                        carLights.forEach((array, index) => {
+                            array.forEach((mesh, index) => {
+                                mesh.material = carLightStartMaterial
+                            })
+                        })
+                        if (state == 0) {
+                            carLights[num].forEach((mesh, index) => {
+                                mesh.material = new BABYLON.StandardMaterial('', scene)
+                                mesh.material.diffuseColor = BABYLON.Color3.Yellow()
+                                mesh.material.emissiveColor = BABYLON.Color3.Yellow()
+                            })
+                            state++
+                        }
+                        else {
+                            carLights[num].forEach((mesh, index) => {
+                                mesh.material = carLightStartMaterial
+                            })
+                            state = 0
+                        }
+                    }
+
                     function update() {
                         if (mf == true) {
                             translate(car, new BABYLON.Vector3(-1, 0, 0), 1.7);
+                            carWheels[0].forEach((mesh, index) => {
+                                mesh.rotation.x += 0.1
+                            })
                         }
                         if (mb == true) {
                             translate(car, new BABYLON.Vector3(1, 0, 0), 1.7);
@@ -448,22 +602,6 @@
                     })
                 });
             });
-
-
-
-
-
-            // simpen2 aja siapa tau kepake ntar
-
-
-            // object.actionManager = new BABYLON.ActionManager(scene);
-            // object.actionManager.registerAction(
-            //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
-            //         function(event) {
-            //             console.log(index);
-            //         }
-            //     )
-            // )
 
         </script>
     </body>
