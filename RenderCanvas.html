@@ -211,8 +211,6 @@
 
                     /*****************************GUI********************************************/ 
 
-                    var lose = false
-
                     var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
                     var image = new BABYLON.GUI.Image("", "./assets/black.png");
@@ -238,14 +236,8 @@
                         image.isVisible = false
                         text1.isVisible = false
                         button.isVisible = false
-                        mf = false;
-                        mb = false;
-                        rl = false;
-                        rr = false;
-                        car.position = new BABYLON.Vector3.Zero()
-                        car.rotationQuaternion = startRotation.clone();
-                        camera.parent = car
-                        lose = false
+                        window.clearTimeout(stopCarPhysicsTimeout)
+                        restart()
                     });
                     gui.addControl(button); 
 
@@ -307,7 +299,7 @@
                     };
                     
                     window.addEventListener('keydown',function (e) {
-                        if (!lose) {
+                        if (!fail) {
                             switch (e.keyCode) {
                                 case 87://w
                                     mf = true;
@@ -321,15 +313,19 @@
                                 case 68://d
                                     rr = true;
                                     break;
+                                case 32://space
+                                    break;
+                                case 82://r
+                                    restart()
+                                    break;
                             }
                         }
                     });
 
                     window.addEventListener('keyup',function (e) {
-                        if (!lose) {
+                        if (!fail) {
                             switch (e.keyCode) {
                                 case 87://w
-                                    maxVel = 0;
                                     mf = false;
                                     break;
                                 case 83://s
@@ -341,11 +337,47 @@
                                 case 68://d
                                     rr = false;
                                     break;
+                                case 32://space
+                                    break;
+                                case 82://r
+                                    break;
                             }
                         }
                     });
 
                     /*****************************End Input********************************************/
+
+                    var fail = false
+                    var stopCarPhysicsTimeout;
+
+                    function stopCarPhysics() {
+                        mf = false;
+                        mb = false;
+                        rl = false;
+                        rr = false;
+                    }
+
+                    function restart() {
+                        stopCarPhysics()
+
+                        // reset car position and rotation
+                        car.position = new BABYLON.Vector3.Zero()
+                        car.rotationQuaternion = startRotation.clone();
+
+                        camera.parent = car
+                        fail = false
+                    }
+
+                    function lose() {
+                        // show lose screen
+                        image.isVisible = true
+                        text1.isVisible = true
+                        button.isVisible = true
+                        
+                        camera.parent = null
+                        stopCarPhysicsTimeout = setTimeout(stopCarPhysics, 1000)
+                        fail = true
+                    }
 
                     function update() {
                         if (mf == true) {
@@ -361,17 +393,12 @@
                             rotate(car, new BABYLON.Vector3(0, 1, 0), 0.05);
                         }
 
+                        // check for collisions
                         mapMeshes.forEach((mesh, index) => {
                             car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
-                                if (!lose) {
-                                    console.log(collided.object.name)
-                                    image.isVisible = true
-                                    text1.isVisible = true
-                                    button.isVisible = true
-                                    camera.parent = null
-                                    car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
-                                    car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
-                                    lose = true
+                                if (!fail) {
+                                    // console.log(collided.object.name)
+                                    lose()
                                 }
                             });
                         });
@@ -399,16 +426,24 @@
                         engine.resize()
                     })
                 });
-
-                // object.actionManager = new BABYLON.ActionManager(scene);
-                // object.actionManager.registerAction(
-                //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
-                //         function(event) {
-                //             console.log(index);
-                //         }
-                //     )
-                // )
             });
+
+
+
+
+
+            // simpen2 aja siapa tau kepake ntar
+
+
+            // object.actionManager = new BABYLON.ActionManager(scene);
+            // object.actionManager.registerAction(
+            //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
+            //         function(event) {
+            //             console.log(index);
+            //         }
+            //     )
+            // )
+
         </script>
     </body>
 </html>
