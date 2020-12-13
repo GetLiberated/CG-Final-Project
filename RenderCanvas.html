@@ -451,8 +451,14 @@
                                     clearInterval(right_indicator)
                                     if (!left_indicator_turned_on)
                                         left_indicator = setInterval( function() { blink(0); }, 500 );
-                                    else
+                                    else {
                                         clearInterval(left_indicator)
+                                        carLights.forEach((array, index) => {
+                                            array.forEach((mesh, index) => {
+                                                mesh.material = carLightStartMaterial
+                                            })
+                                        })
+                                    }
                                     left_indicator_turned_on = !left_indicator_turned_on
                                     break;
                                 case 69://e
@@ -460,8 +466,14 @@
                                     clearInterval(left_indicator)
                                     if (!right_indicator_turned_on)
                                         right_indicator = setInterval( function() { blink(1); }, 500 );
-                                    else
+                                    else {
                                         clearInterval(right_indicator)
+                                        carLights.forEach((array, index) => {
+                                            array.forEach((mesh, index) => {
+                                                mesh.material = carLightStartMaterial
+                                            })
+                                        })
+                                    }
                                     right_indicator_turned_on = !right_indicator_turned_on
                                     break;
                             }
