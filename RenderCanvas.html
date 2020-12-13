@@ -390,6 +390,10 @@
                             mesh.physicsImpostor.setLinearVelocity(
                                 new BABYLON.Vector3( -50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
                             );
+                        if (mesh.physicsImpostor.getLinearVelocity().x > 50) 
+                            mesh.physicsImpostor.setLinearVelocity(
+                                new BABYLON.Vector3( 50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
+                            );
 
                         mesh.physicsImpostor.setLinearVelocity(
                             mesh.physicsImpostor.getLinearVelocity().add(
@@ -574,7 +578,10 @@
                             rotate(car, new BABYLON.Vector3(0, mb ? -1 : 1, 0), 0.05);
                         }
                         if (brake == true) {
-                            translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
+                            if (car.physicsImpostor.getLinearVelocity().x < 0) 
+                                translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
+                            if (car.physicsImpostor.getLinearVelocity().x > 0) 
+                                translate(car, new BABYLON.Vector3(1, 0, 0), -1);
                         }
 
                         // limit camera zoom
