@@ -578,9 +578,6 @@
                         // add thrust to car physics
                         if (mf == true) {
                             translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
-                            carWheels[0].forEach((mesh, index) => {
-                                mesh.rotation.x += 0.1
-                            })
                         }
                         if (mb == true) {
                             translate(car, new BABYLON.Vector3(1, 0, 0), 1);
@@ -603,6 +600,14 @@
                             camera.radius = 40;
                         if (camera.radius < 20)
                             camera.radius = 20;
+
+                        if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
+                            carWheels.forEach((array, index) => {
+                                array.forEach((mesh, index) => {
+                                    mesh.rotation.y += car.physicsImpostor.getLinearVelocity().x/16
+                                })
+                            })
+                        }
                     }
 
                     scene.registerBeforeRender(function () {
