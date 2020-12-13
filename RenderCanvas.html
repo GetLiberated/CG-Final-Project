@@ -79,7 +79,7 @@
                         //Create body and apply material
                         var carBody = BABYLON.MeshBuilder.ExtrudeShape("body", {shape: side, path: extrudePath, cap : BABYLON.Mesh.CAP_ALL}, scene);
                         carBody.material = bodyMaterial;
-                        carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 25, friction: 5}, scene);
+                        carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
 
                         return carBody
                     }
@@ -216,7 +216,6 @@
                             mesh.checkCollisions = true
                             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
 
-
                             // check for collisions
                             car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
                                 if (!fail) {
@@ -234,7 +233,7 @@
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
                             // mesh.showBoundingBox = true;
                             mesh.checkCollisions = true
-                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.1}, scene);
+                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.8}, scene);
                         });
                     });
 
@@ -388,8 +387,9 @@
                     function translate (mesh, direction, power) {
                         // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
                         if (mesh.physicsImpostor.getLinearVelocity().x < -50) 
-                            mesh.physicsImpostor.setLinearVelocity( new BABYLON.Vector3(-50,
-                                mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z));
+                            mesh.physicsImpostor.setLinearVelocity(
+                                new BABYLON.Vector3( -50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
+                            );
 
                         mesh.physicsImpostor.setLinearVelocity(
                             mesh.physicsImpostor.getLinearVelocity().add(
@@ -406,6 +406,7 @@
                     var mb = false;
                     var rl = false;
                     var rr = false;
+                    var brake = false
                     
                     var oKeyBoard = {
                         bPressRight: false,
@@ -436,6 +437,7 @@
                                     rr = true;
                                     break;
                                 case 32://space
+                                    brake = true
                                     break;
                                 case 82://r
                                     restart()
@@ -478,6 +480,7 @@
                                     rr = false;
                                     break;
                                 case 32://space
+                                    brake = false
                                     break;
                                 case 82://r
                                     break;
@@ -556,19 +559,22 @@
 
                     function update() {
                         if (mf == true) {
-                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1.7);
+                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
                             carWheels[0].forEach((mesh, index) => {
                                 mesh.rotation.x += 0.1
                             })
                         }
                         if (mb == true) {
-                            translate(car, new BABYLON.Vector3(1, 0, 0), 1.7);
+                            translate(car, new BABYLON.Vector3(1, 0, 0), 1);
                         }
                         if (rl == true) {
-                            rotate(car, new BABYLON.Vector3(0, -1, 0), 0.05);
+                            rotate(car, new BABYLON.Vector3(0, mb ? 1 : -1, 0), 0.05);
                         }
                         if (rr == true) {
-                            rotate(car, new BABYLON.Vector3(0, 1, 0), 0.05);
+                            rotate(car, new BABYLON.Vector3(0, mb ? -1 : 1, 0), 0.05);
+                        }
+                        if (brake == true) {
+                            translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
                         }
 
                         // limit camera zoom
