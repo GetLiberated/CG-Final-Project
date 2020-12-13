@@ -39,6 +39,9 @@
                     var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
                     camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
                     camera.attachControl(canvas, true)
+                    let cameraStartAlpha = camera.alpha
+                    let cameraStartBeta = camera.beta
+                    let cameraStartRadius = camera.radius
                     camera.checkCollisions = true;
                     
                     // lights
@@ -78,7 +81,7 @@
                     var car = createCar()
                     // camera.setTarget(car)
                     camera.parent = car;
-                    let startRotation = car.rotationQuaternion.clone();
+                    let carStartRotation = car.rotationQuaternion.clone();
 
                     let carCollider;
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
@@ -367,10 +370,15 @@
 
                         // reset car position and rotation
                         car.position = new BABYLON.Vector3.Zero()
-                        car.rotationQuaternion = startRotation.clone();
+                        car.rotationQuaternion = carStartRotation.clone();
 
+                        // reset camera
+                        camera.alpha = cameraStartAlpha;
+                        camera.beta = cameraStartBeta;
+                        camera.radius = cameraStartRadius
                         camera.attachControl(canvas, true)
                         camera.parent = car
+
                         fail = false
                     }
 
@@ -380,7 +388,7 @@
                         text1.isVisible = true
                         button.isVisible = true
                         
-                        camera.attachControl(null, true)
+                        camera.detachControl(canvas)
                         camera.parent = null
                         stopCarPhysicsTimeout = setTimeout(stopCarPhysics, 1000)
                         fail = true
