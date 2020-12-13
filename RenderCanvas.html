@@ -132,15 +132,15 @@
                                 // RF
                                 case 542:
                                     // mesh.dispose()
-                                    carWheels[1].push(mesh)
+                                    carWheels[0].push(mesh)
                                     break
                                 case 553:
                                     // mesh.dispose()
-                                    carWheels[1].push(mesh)
+                                    carWheels[0].push(mesh)
                                     break
                                 case 594:
                                     // mesh.dispose()
-                                    carWheels[1].push(mesh)
+                                    carWheels[0].push(mesh)
                                     break
 
                                 case 462:
@@ -153,15 +153,15 @@
                                 // LB
                                 case 579:
                                     // mesh.dispose()
-                                    carWheels[0].push(mesh)
+                                    carWheels[1].push(mesh)
                                     break
                                 case 584:
                                     // mesh.dispose()
-                                    carWheels[0].push(mesh)
+                                    carWheels[1].push(mesh)
                                     break
                                 case 592:
                                     // mesh.dispose()
-                                    carWheels[0].push(mesh)
+                                    carWheels[1].push(mesh)
                                     break
 
                                 case 231:
@@ -215,6 +215,15 @@
                             // mesh.showBoundingBox = true;
                             mesh.checkCollisions = true
                             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+
+
+                            // check for collisions
+                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
+                                if (!fail) {
+                                    // console.log(collided.object.name)
+                                    lose()
+                                }
+                            });
                         });
                     });
 
@@ -561,16 +570,6 @@
                         if (rr == true) {
                             rotate(car, new BABYLON.Vector3(0, 1, 0), 0.05);
                         }
-
-                        // check for collisions
-                        mapMeshes.forEach((mesh, index) => {
-                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
-                                if (!fail) {
-                                    // console.log(collided.object.name)
-                                    lose()
-                                }
-                            });
-                        });
 
                         // limit camera zoom
                         if (camera.radius > 40)
