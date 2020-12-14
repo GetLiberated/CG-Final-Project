@@ -27,22 +27,36 @@
         <script>
             window.addEventListener("DOMContentLoaded", function(){
                 var canvas = document.getElementById("canvas");
-                var engine = new BABYLON.Engine(canvas,true);
+                var engine = new BABYLON.Engine(canvas, true);
 
                 var createScene = function() {
                     var scene = new BABYLON.Scene(engine);
 
-                    // Enable physics
+                    // enable debug mode
+                    // scene.debugLayer.show()
+
+                    // enable physics
                     scene.enablePhysics(new BABYLON.Vector3(0,-32, 0), new BABYLON.OimoJSPlugin());
 
                     // camera
                     var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
                     camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
+                    camera.attachControl(canvas, true)
+                    let cameraStartAlpha = camera.alpha
+                    let cameraStartBeta = camera.beta
+                    let cameraStartRadius = camera.radius
+                    camera.checkCollisions = true;
                     
                     // lights
                     var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
                     var light2 = new BABYLON.HemisphericLight("light2", new BABYLON.Vector3(0, 1, 0), scene);
                     light2.intensity = 0.75;
+
+                    // glow layer
+                    var gl = new BABYLON.GlowLayer("glow", scene, { 
+                        mainTextureFixedSize: 1024,
+                        blurKernelSize: 64
+                    });
                     
                     /***************************Car*********************************************/
                     
@@ -68,15 +82,17 @@
                         //Create body and apply material
                         var carBody = BABYLON.MeshBuilder.ExtrudeShape("body", {shape: side, path: extrudePath, cap : BABYLON.Mesh.CAP_ALL}, scene);
                         carBody.material = bodyMaterial;
-                        carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 25, friction: 5}, scene);
+                        carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
 
                         return carBody
                     }
                     
                     var car = createCar()
                     camera.parent = car;
+                    let carStartRotation = car.rotationQuaternion.clone();
 
-                    let carCollider;
+                    let carWheels = [[], []]
+                    let carLights = [[], []]
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
                         meshes.forEach((mesh, index) => {
                             mesh.parent = car
@@ -88,10 +104,103 @@
                             // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
                             // mesh.material = mat;
 
-                            if (index === 13) {
-                                // mesh.showBoundingBox = true;
-                                carCollider = mesh;
+                            switch (index) {
+                                case 13:
+                                    // mesh.dispose()
+                                    break
+
+                                // LF
+                                case 562:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 570:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 573:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+
+                                case 474:
+                                    carLightStartMaterial = mesh.material
+                                    carLights[0].push(mesh)
+                                    break
+                                case 506:
+                                    carLights[0].push(mesh)
+                                    break
+
+                                // RF
+                                case 542:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 553:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+                                case 594:
+                                    // mesh.dispose()
+                                    carWheels[0].push(mesh)
+                                    break
+
+                                case 462:
+                                    carLights[1].push(mesh)
+                                    break
+                                case 496:
+                                    carLights[1].push(mesh)
+                                    break
+
+                                // LB
+                                case 579:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 584:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 592:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+
+                                case 231:
+                                    carLights[0].push(mesh)
+                                    break
+
+                                // RB
+                                case 603:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 608:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+                                case 610:
+                                    // mesh.dispose()
+                                    carWheels[1].push(mesh)
+                                    break
+
+                                case 215:
+                                    carLights[1].push(mesh)
+                                    break
                             }
+
+                            // mesh identifier
+
+                            // mesh.showBoundingBox = true;
+                            // mesh.actionManager = new BABYLON.ActionManager(scene);
+                            // mesh.actionManager.registerAction(
+                            //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
+                            //         function(event) {
+                            //             console.log(index);
+                            //             mesh.dispose()
+                            //         }
+                            //     )
+                            // )
                         });
                     });
                     
@@ -107,7 +216,16 @@
                             mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
                             // mesh.showBoundingBox = true;
+                            mesh.checkCollisions = true
                             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+
+                            // check for collisions
+                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
+                                if (!fail) {
+                                    // console.log(collided.object.name)
+                                    lose()
+                                }
+                            });
                         });
                     });
 
@@ -117,7 +235,8 @@
                             mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
                             // mesh.showBoundingBox = true;
-                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.1}, scene);
+                            mesh.checkCollisions = true
+                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.8}, scene);
                         });
                     });
 
@@ -210,8 +329,6 @@
 
                     /*****************************GUI********************************************/ 
 
-                    var lose = false
-
                     var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
                     var image = new BABYLON.GUI.Image("", "./assets/black.png");
@@ -237,11 +354,8 @@
                         image.isVisible = false
                         text1.isVisible = false
                         button.isVisible = false
-                        car.position = new BABYLON.Vector3.Zero()
-                        car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
-                        car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
-                        camera.parent = car
-                        lose = false
+                        window.clearTimeout(stopCarPhysicsTimeout)
+                        restart()
                     });
                     gui.addControl(button); 
 
@@ -275,9 +389,18 @@
 
                     function translate (mesh, direction, power) {
                         // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
+
+                        // limit forward velocity speed
                         if (mesh.physicsImpostor.getLinearVelocity().x < -50) 
-                            mesh.physicsImpostor.setLinearVelocity( new BABYLON.Vector3(-50,
-                                mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z));
+                            mesh.physicsImpostor.setLinearVelocity(
+                                new BABYLON.Vector3( -50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
+                            );
+
+                        // limit backward velocity speed
+                        if (mesh.physicsImpostor.getLinearVelocity().x > 50) 
+                            mesh.physicsImpostor.setLinearVelocity(
+                                new BABYLON.Vector3( 50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
+                            );
 
                         mesh.physicsImpostor.setLinearVelocity(
                             mesh.physicsImpostor.getLinearVelocity().add(
@@ -290,20 +413,20 @@
 
                     /*****************************Input********************************************/
 
-                    var mf = false;
-                    var mb = false;
-                    var rl = false;
-                    var rr = false;
-                    
-                    var oKeyBoard = {
-                        bPressRight: false,
-                        bPressLeft: false,
-                        bPressUp: false,
-                        bPressDown: false
-                    };
+                    var mf = false; // move forward
+                    var mb = false; // move backward
+                    var rl = false; // rotate left
+                    var rr = false; // rotate right
+                    var brake = false
+
+                    var left_indicator_turned_on = false;
+                    var left_indicator;
+                    var right_indicator_turned_on = false;
+                    var right_indicator;
+                    var carLightStartMaterial;
                     
                     window.addEventListener('keydown',function (e) {
-                        if (!lose) {
+                        if (!fail) {
                             switch (e.keyCode) {
                                 case 87://w
                                     mf = true;
@@ -317,15 +440,50 @@
                                 case 68://d
                                     rr = true;
                                     break;
+                                case 32://space
+                                    brake = true
+                                    break;
+                                case 82://r
+                                    restart()
+                                    break;
+                                case 81://q
+                                    right_indicator_turned_on = false
+                                    clearInterval(right_indicator)
+                                    if (!left_indicator_turned_on)
+                                        left_indicator = setInterval( function() { blink(0); }, 500 );
+                                    else {
+                                        clearInterval(left_indicator)
+                                        carLights.forEach((array, index) => {
+                                            array.forEach((mesh, index) => {
+                                                mesh.material = carLightStartMaterial
+                                            })
+                                        })
+                                    }
+                                    left_indicator_turned_on = !left_indicator_turned_on
+                                    break;
+                                case 69://e
+                                    left_indicator_turned_on = false
+                                    clearInterval(left_indicator)
+                                    if (!right_indicator_turned_on)
+                                        right_indicator = setInterval( function() { blink(1); }, 500 );
+                                    else {
+                                        clearInterval(right_indicator)
+                                        carLights.forEach((array, index) => {
+                                            array.forEach((mesh, index) => {
+                                                mesh.material = carLightStartMaterial
+                                            })
+                                        })
+                                    }
+                                    right_indicator_turned_on = !right_indicator_turned_on
+                                    break;
                             }
                         }
                     });
 
                     window.addEventListener('keyup',function (e) {
-                        if (!lose) {
+                        if (!fail) {
                             switch (e.keyCode) {
                                 case 87://w
-                                    maxVel = 0;
                                     mf = false;
                                     break;
                                 case 83://s
@@ -337,44 +495,119 @@
                                 case 68://d
                                     rr = false;
                                     break;
+                                case 32://space
+                                    brake = false
+                                    break;
+                                case 82://r
+                                    break;
+                                case 81://q
+                                    break;
+                                case 69://e
+                                    break;
                             }
                         }
                     });
 
                     /*****************************End Input********************************************/
 
-                    function update() {
+                    var fail = false
+                    var stopCarPhysicsTimeout;
+
+                    function stopCarPhysics() {
+                        mf = false;
+                        mb = false;
+                        rl = false;
+                        rr = false;
+                    }
+
+                    function restart() {
+                        stopCarPhysics()
+
+                        // reset car position and rotation
+                        car.position = new BABYLON.Vector3.Zero()
+                        car.rotationQuaternion = carStartRotation.clone();
+
+                        // reset camera
+                        camera.alpha = cameraStartAlpha;
+                        camera.beta = cameraStartBeta;
+                        camera.radius = cameraStartRadius
+                        camera.attachControl(canvas, true)
+                        camera.parent = car
+
+                        fail = false
+                    }
+
+                    function lose() { // called when player failed to achieve the objective
+                        // show lose screen
+                        image.isVisible = true
+                        text1.isVisible = true
+                        button.isVisible = true
+                        
+                        camera.detachControl(canvas)
+                        camera.parent = null
+                        stopCarPhysicsTimeout = setTimeout(stopCarPhysics, 1000)
+                        fail = true
+                    }
+
+                    var state = 0
+
+                    function blink(num) { // called for blinking car light
+                        // reset material to prevent light getting stuck when stopping
+                        carLights.forEach((array, index) => {
+                            array.forEach((mesh, index) => {
+                                mesh.material = carLightStartMaterial
+                            })
+                        })
+                        if (state == 0) {
+                            carLights[num].forEach((mesh, index) => {
+                                mesh.material = new BABYLON.StandardMaterial('', scene)
+                                mesh.material.diffuseColor = BABYLON.Color3.Yellow()
+                                mesh.material.emissiveColor = BABYLON.Color3.Yellow()
+                            })
+                            state++
+                        }
+                        else {
+                            carLights[num].forEach((mesh, index) => {
+                                mesh.material = carLightStartMaterial
+                            })
+                            state = 0
+                        }
+                    }
+
+                    function update() { // function for codes that needs constant loop
+                        // add thrust to car physics
                         if (mf == true) {
-                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1.7);
+                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
                         }
                         if (mb == true) {
-                            translate(car, new BABYLON.Vector3(1, 0, 0), 1.7);
+                            translate(car, new BABYLON.Vector3(1, 0, 0), 1);
                         }
                         if (rl == true) {
-                            rotate(car, new BABYLON.Vector3(0, -1, 0), 0.05);
+                            rotate(car, new BABYLON.Vector3(0, mb ? 1 : -1, 0), 0.05);
                         }
                         if (rr == true) {
-                            rotate(car, new BABYLON.Vector3(0, 1, 0), 0.05);
+                            rotate(car, new BABYLON.Vector3(0, mb ? -1 : 1, 0), 0.05);
+                        }
+                        if (brake == true) {
+                            if (car.physicsImpostor.getLinearVelocity().x < 0) 
+                                translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
+                            if (car.physicsImpostor.getLinearVelocity().x > 0) 
+                                translate(car, new BABYLON.Vector3(1, 0, 0), -1);
                         }
 
-                        mapMeshes.forEach((mesh, index) => {
-                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
-                                if (!lose) {
-                                    console.log(collided.object.name)
-                                    image.isVisible = true
-                                    text1.isVisible = true
-                                    button.isVisible = true
-                                    camera.parent = null
-                                    mf = false;
-                                    mb = false;
-                                    rl = false;
-                                    rr = false;
-                                    car.physicsImpostor.setAngularVelocity(new BABYLON.Vector3.Zero())
-                                    car.physicsImpostor.setLinearVelocity(new BABYLON.Vector3.Zero())
-                                    lose = true
-                                }
-                            });
-                        });
+                        // limit camera zoom
+                        if (camera.radius > 40)
+                            camera.radius = 40;
+                        if (camera.radius < 20)
+                            camera.radius = 20;
+
+                        if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
+                            carWheels.forEach((array, index) => {
+                                array.forEach((mesh, index) => {
+                                    mesh.rotation.y += car.physicsImpostor.getLinearVelocity().x/16
+                                })
+                            })
+                        }
                     }
 
                     scene.registerBeforeRender(function () {
@@ -399,16 +632,8 @@
                         engine.resize()
                     })
                 });
-
-                // object.actionManager = new BABYLON.ActionManager(scene);
-                // object.actionManager.registerAction(
-                //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
-                //         function(event) {
-                //             console.log(index);
-                //         }
-                //     )
-                // )
             });
+
         </script>
     </body>
 </html>
