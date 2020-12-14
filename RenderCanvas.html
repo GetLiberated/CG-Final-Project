@@ -42,6 +42,7 @@
                     var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
                     camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
                     camera.attachControl(canvas, true)
+                    camera.inputs.attached.pointers.buttons = [0] // disable right mouse button drag
                     let cameraStartAlpha = camera.alpha
                     let cameraStartBeta = camera.beta
                     let cameraStartRadius = camera.radius
@@ -91,7 +92,7 @@
                     camera.parent = car;
                     let carStartRotation = car.rotationQuaternion.clone();
 
-                    let carWheels = [[], []]
+                    let carWheels = []
                     let carLights = [[], []]
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
                         meshes.forEach((mesh, index) => {
@@ -104,90 +105,27 @@
                             // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
                             // mesh.material = mat;
 
-                            switch (index) {
-                                case 13:
-                                    // mesh.dispose()
-                                    break
+                            let wheelIndex = [562,570,573,542,553,594,579,584,592,603,608,610,596,600,598,606,604,602,564,568,566,572,576,574,586,590,580,578,582,588,550,558,548,560,554,546,556,544,552]
+                            wheelIndex.forEach(i => {
+                                if (i == index) {
+                                    mesh.dispose()
+                                }
+                            })
 
-                                // LF
-                                case 562:
-                                    // mesh.dispose()
-                                    carWheels[0].push(mesh)
-                                    break
-                                case 570:
-                                    // mesh.dispose()
-                                    carWheels[0].push(mesh)
-                                    break
-                                case 573:
-                                    // mesh.dispose()
-                                    carWheels[0].push(mesh)
-                                    break
-
-                                case 474:
+                            let leftLightIndex = [474, 506, 231]
+                            leftLightIndex.forEach(i => {
+                                if (i == index) {
                                     carLightStartMaterial = mesh.material
                                     carLights[0].push(mesh)
-                                    break
-                                case 506:
-                                    carLights[0].push(mesh)
-                                    break
+                                }
+                            })
 
-                                // RF
-                                case 542:
-                                    // mesh.dispose()
-                                    carWheels[0].push(mesh)
-                                    break
-                                case 553:
-                                    // mesh.dispose()
-                                    carWheels[0].push(mesh)
-                                    break
-                                case 594:
-                                    // mesh.dispose()
-                                    carWheels[0].push(mesh)
-                                    break
-
-                                case 462:
+                            let rightLightIndex = [462, 496, 215]
+                            rightLightIndex.forEach(i => {
+                                if (i == index) {
                                     carLights[1].push(mesh)
-                                    break
-                                case 496:
-                                    carLights[1].push(mesh)
-                                    break
-
-                                // LB
-                                case 579:
-                                    // mesh.dispose()
-                                    carWheels[1].push(mesh)
-                                    break
-                                case 584:
-                                    // mesh.dispose()
-                                    carWheels[1].push(mesh)
-                                    break
-                                case 592:
-                                    // mesh.dispose()
-                                    carWheels[1].push(mesh)
-                                    break
-
-                                case 231:
-                                    carLights[0].push(mesh)
-                                    break
-
-                                // RB
-                                case 603:
-                                    // mesh.dispose()
-                                    carWheels[1].push(mesh)
-                                    break
-                                case 608:
-                                    // mesh.dispose()
-                                    carWheels[1].push(mesh)
-                                    break
-                                case 610:
-                                    // mesh.dispose()
-                                    carWheels[1].push(mesh)
-                                    break
-
-                                case 215:
-                                    carLights[1].push(mesh)
-                                    break
-                            }
+                                }
+                            })
 
                             // mesh identifier
 
@@ -201,7 +139,34 @@
                             //         }
                             //     )
                             // )
+                            
                         });
+
+                        new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Tire.obj", scene, (meshes) => {
+                            let carWheel = BABYLON.Mesh.MergeMeshes(meshes, true, true, undefined, false, true)
+                            carWheel.parent = car
+                            carWheel.position = new BABYLON.Vector3(-7, 1.2, 2.8)
+                            carWheel.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
+                            carWheel.rotation = new BABYLON.Vector3(0, 0, 0)
+                            carWheels.push(carWheel)
+                            
+                            let carWheel2 = carWheel.createInstance()
+                            carWheel2.parent = car
+                            carWheel2.position = new BABYLON.Vector3(-7, 1.2, -2.94)
+                            carWheel2.rotation = new BABYLON.Vector3(0, Math.PI, 0)
+                            carWheels.push(carWheel2)
+
+                            let carWheel3 = carWheel.createInstance()
+                            carWheel3.parent = car
+                            carWheel3.position = new BABYLON.Vector3(3, 1.2, 2.8)
+                            carWheels.push(carWheel3)
+
+                            let carWheel4 = carWheel.createInstance()
+                            carWheel4.parent = car
+                            carWheel4.position = new BABYLON.Vector3(3, 1.2, -2.94)
+                            carWheel4.rotation = new BABYLON.Vector3(0, Math.PI, 0)
+                            carWheels.push(carWheel4)
+                        })
                     });
                     
                     /***************************End Car*********************************************/
@@ -363,22 +328,27 @@
                     
                     /*****************************Physics********************************************/
 
-                    var transformForce = function (mesh, vec) {
+                    function transformForce(mesh, vec) {
                         var mymatrix = new BABYLON.Matrix();
                         mesh.rotationQuaternion.toRotationMatrix(mymatrix);
                         return BABYLON.Vector3.TransformNormal(vec, mymatrix);
                     };
 
-                    var rotate = function (mesh, direction, power) {
-                        var maxRotation = 1.3;
+                    var rotate = function(mesh, direction, power) {
                         // console.log("angular y: " + mesh.physicsImpostor.getAngularVelocity().y);
-                        if (mesh.physicsImpostor.getAngularVelocity().y < -maxRotation) 
-                            mesh.physicsImpostor.setAngularVelocity( new BABYLON.Vector3(mesh.physicsImpostor.getAngularVelocity().x,
-                                -maxRotation, mesh.physicsImpostor.getAngularVelocity().z));
+                        var maxRotation = 1;
 
+                        // limit left rotation
+                        if (mesh.physicsImpostor.getAngularVelocity().y < -maxRotation) 
+                            mesh.physicsImpostor.setAngularVelocity( 
+                                new BABYLON.Vector3(mesh.physicsImpostor.getAngularVelocity().x, -maxRotation, mesh.physicsImpostor.getAngularVelocity().z)
+                            );
+
+                        // limit right rotation
                         if (mesh.physicsImpostor.getAngularVelocity().y > maxRotation) 
-                            mesh.physicsImpostor.setAngularVelocity( new BABYLON.Vector3(mesh.physicsImpostor.getAngularVelocity().x,
-                            maxRotation, mesh.physicsImpostor.getAngularVelocity().z));
+                            mesh.physicsImpostor.setAngularVelocity( 
+                                new BABYLON.Vector3(mesh.physicsImpostor.getAngularVelocity().x, maxRotation, mesh.physicsImpostor.getAngularVelocity().z)
+                            );
                                 
                         mesh.physicsImpostor.setAngularVelocity(
                             mesh.physicsImpostor.getAngularVelocity().add(
@@ -387,19 +357,20 @@
                         );
                     }
 
-                    function translate (mesh, direction, power) {
+                    var translate = function(mesh, direction, power) {
                         // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
+                        var maxSpeed = 50;
 
                         // limit forward velocity speed
-                        if (mesh.physicsImpostor.getLinearVelocity().x < -50) 
+                        if (mesh.physicsImpostor.getLinearVelocity().x < -maxSpeed) 
                             mesh.physicsImpostor.setLinearVelocity(
-                                new BABYLON.Vector3( -50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
+                                new BABYLON.Vector3( -maxSpeed, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
                             );
 
                         // limit backward velocity speed
-                        if (mesh.physicsImpostor.getLinearVelocity().x > 50) 
+                        if (mesh.physicsImpostor.getLinearVelocity().x > maxSpeed) 
                             mesh.physicsImpostor.setLinearVelocity(
-                                new BABYLON.Vector3( 50, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
+                                new BABYLON.Vector3( maxSpeed, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
                             );
 
                         mesh.physicsImpostor.setLinearVelocity(
@@ -526,6 +497,8 @@
                         // reset car position and rotation
                         car.position = new BABYLON.Vector3.Zero()
                         car.rotationQuaternion = carStartRotation.clone();
+                        carWheels[0].rotation.y = 0
+                        carWheels[1].rotation.y = Math.PI
 
                         // reset camera
                         camera.alpha = cameraStartAlpha;
@@ -574,19 +547,39 @@
                         }
                     }
 
+                    var rotation = 0.05
+
                     function update() { // function for codes that needs constant loop
                         // add thrust to car physics
                         if (mf == true) {
                             translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
+                            if (carWheels[0].rotation.y < -0.05)
+                                rotate(car, new BABYLON.Vector3(0, -1, 0), -carWheels[0].rotation.y/4);
+                            if (carWheels[0].rotation.y > 0.05)
+                                rotate(car, new BABYLON.Vector3(0, 1, 0), carWheels[0].rotation.y/4);
                         }
                         if (mb == true) {
                             translate(car, new BABYLON.Vector3(1, 0, 0), 1);
+                            if (carWheels[0].rotation.y < -0.05)
+                                rotate(car, new BABYLON.Vector3(0, 1, 0), -carWheels[0].rotation.y/4);
+                            if (carWheels[0].rotation.y > 0.05)
+                                rotate(car, new BABYLON.Vector3(0, -1, 0), carWheels[0].rotation.y/4);
                         }
                         if (rl == true) {
-                            rotate(car, new BABYLON.Vector3(0, mb ? 1 : -1, 0), 0.05);
+                            if (carWheels[0].rotation.y < -0.5) {
+                            }
+                            else {
+                                carWheels[0].rotation.y += -rotation
+                                carWheels[1].rotation.y += -rotation
+                            }
                         }
                         if (rr == true) {
-                            rotate(car, new BABYLON.Vector3(0, mb ? -1 : 1, 0), 0.05);
+                            if (carWheels[0].rotation.y > 0.5) {
+                            }
+                            else {
+                                carWheels[0].rotation.y += rotation
+                                carWheels[1].rotation.y += rotation
+                            }
                         }
                         if (brake == true) {
                             if (car.physicsImpostor.getLinearVelocity().x < 0) 
@@ -601,11 +594,13 @@
                         if (camera.radius < 20)
                             camera.radius = 20;
 
+                        // car wheel rotation physics
                         if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
-                            carWheels.forEach((array, index) => {
-                                array.forEach((mesh, index) => {
-                                    mesh.rotation.y += car.physicsImpostor.getLinearVelocity().x/16
-                                })
+                            carWheels.forEach((mesh, index) => {
+                                if (index%2)
+                                    mesh.rotation.z += car.physicsImpostor.getLinearVelocity().x/16
+                                else 
+                                    mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().x/16
                             })
                         }
                     }
