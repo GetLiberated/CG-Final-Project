@@ -684,6 +684,10 @@
                                     break;
                                 case 32://space
                                     brake = true
+                                    var mat = new BABYLON.StandardMaterial('', scene)
+                                    mat.diffuseColor = BABYLON.Color3.Red()
+                                    mat.emissiveColor = BABYLON.Color3.Red()
+                                    carLights[1][0].material = carLights[0][0].material = mat
                                     break;
                                 case 82://r
                                     restart()
@@ -718,6 +722,7 @@
                                     break;
                                 case 32://space
                                     brake = false
+                                    carLights[1][0].material = carLights[0][0].material = carLightStartMaterial
                                     break;
                                 case 82://r
                                     break;
@@ -834,6 +839,7 @@
                                 translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
                             if (car.physicsImpostor.getLinearVelocity().x > 0) 
                                 translate(car, new BABYLON.Vector3(1, 0, 0), -1);
+                            if (car.physicsImpostor.getLinearVelocity().x === 0) {}
                         }
 
                         // car wheel rotation physics
