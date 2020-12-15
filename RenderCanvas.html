@@ -37,16 +37,19 @@
 
                     // enable physics
                     scene.enablePhysics(new BABYLON.Vector3(0,-32, 0), new BABYLON.OimoJSPlugin());
-
+                       
                     // camera
                     var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
                     camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
                     camera.attachControl(canvas, true)
                     camera.inputs.attached.pointers.buttons = [0] // disable right mouse button drag
-                    let cameraStartAlpha = camera.alpha
-                    let cameraStartBeta = camera.beta
-                    let cameraStartRadius = camera.radius
+                    var cameraStartAlpha = camera.alpha
+                    var cameraStartBeta = camera.beta
+                    var cameraStartRadius = camera.radius
                     camera.checkCollisions = true;
+
+                    var camera2 = new BABYLON.ArcRotateCamera("camera2",  0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
+                    camera2.setPosition(new BABYLON.Vector3(0, 0, 10));
                     
                     // lights
                     var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
@@ -90,10 +93,12 @@
                     
                     var car = createCar()
                     camera.parent = car;
-                    let carStartRotation = car.rotationQuaternion.clone();
-
-                    let carWheels = []
-                    let carLights = [[], []]
+                    camera2.parent = car
+                    var carStartRotation = car.rotationQuaternion.clone();
+                    
+                    var carWheels = []
+                    var carLights = [[], []]
+                    var carLightStartMaterial;
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
                         meshes.forEach((mesh, index) => {
                             mesh.parent = car
@@ -101,18 +106,18 @@
                             mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
                             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
 
-                            // let mat = new BABYLON.StandardMaterial('mat', scene);
+                            // var mat = new BABYLON.StandardMaterial('mat', scene);
                             // mat.diffuseTexture = new BABYLON.Texture("T-Rex/Medie"+index+".jpg");
                             // mesh.material = mat;
 
-                            let wheelIndex = [562,570,573,542,553,594,579,584,592,603,608,610,596,600,598,606,604,602,564,568,566,572,576,574,586,590,580,578,582,588,550,558,548,560,554,546,556,544,552]
+                            var wheelIndex = [562,570,573,542,553,594,579,584,592,603,608,610,596,600,598,606,604,602,564,568,566,572,576,574,586,590,580,578,582,588,550,558,548,560,554,546,556,544,552]
                             wheelIndex.forEach(i => {
                                 if (i == index) {
                                     mesh.dispose()
                                 }
                             })
 
-                            let leftLightIndex = [474, 506, 231]
+                            var leftLightIndex = [474, 506, 231]
                             leftLightIndex.forEach(i => {
                                 if (i == index) {
                                     carLightStartMaterial = mesh.material
@@ -120,12 +125,27 @@
                                 }
                             })
 
-                            let rightLightIndex = [462, 496, 215]
+                            var rightLightIndex = [462, 496, 215]
                             rightLightIndex.forEach(i => {
                                 if (i == index) {
                                     carLights[1].push(mesh)
                                 }
                             })
+
+                            if (index == 446) {
+                                
+                            }
+
+                            // if (index == 420) {
+                            //     var bodyMaterial = new BABYLON.StandardMaterial("body_mat", scene);
+                            //     bodyMaterial.diffuseColor = new BABYLON.Color3(1.0, 0.25, 0.25);
+                            //     bodyMaterial.backFaceCulling = false;
+                            //     const box = BABYLON.MeshBuilder.CreateBox("box", {height: 3, width: 3, depth: 3})
+                            //     box.material = bodyMaterial
+                            //     box.parent = mesh
+                            //     box.position.x = 10
+                            //     camera2.setTarget(box)
+                            // }
 
                             // mesh identifier
 
@@ -143,25 +163,25 @@
                         });
 
                         new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Tire.obj", scene, (meshes) => {
-                            let carWheel = BABYLON.Mesh.MergeMeshes(meshes, true, true, undefined, false, true)
+                            var carWheel = BABYLON.Mesh.MergeMeshes(meshes, true, true, undefined, false, true)
                             carWheel.parent = car
                             carWheel.position = new BABYLON.Vector3(-7, 1.2, 2.8)
                             carWheel.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
                             carWheel.rotation = new BABYLON.Vector3(0, 0, 0)
                             carWheels.push(carWheel)
                             
-                            let carWheel2 = carWheel.createInstance()
+                            var carWheel2 = carWheel.createInstance()
                             carWheel2.parent = car
                             carWheel2.position = new BABYLON.Vector3(-7, 1.2, -2.94)
                             carWheel2.rotation = new BABYLON.Vector3(0, Math.PI, 0)
                             carWheels.push(carWheel2)
 
-                            let carWheel3 = carWheel.createInstance()
+                            var carWheel3 = carWheel.createInstance()
                             carWheel3.parent = car
                             carWheel3.position = new BABYLON.Vector3(3, 1.2, 2.8)
                             carWheels.push(carWheel3)
 
-                            let carWheel4 = carWheel.createInstance()
+                            var carWheel4 = carWheel.createInstance()
                             carWheel4.parent = car
                             carWheel4.position = new BABYLON.Vector3(3, 1.2, -2.94)
                             carWheel4.rotation = new BABYLON.Vector3(0, Math.PI, 0)
@@ -173,7 +193,7 @@
                     
                     /*****************************Map********************************************/
 
-                    let mapMeshes;
+                    var mapMeshes;
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Objects Real.obj", scene, (meshes) => {
                         mapMeshes = meshes
                         meshes.forEach((mesh, index) => {
@@ -205,6 +225,17 @@
                         });
                     });
 
+                    // new BABYLON.SceneLoader.ImportMesh(null, "./assets/traffic light/", "traffic light.obj", scene, (meshes) => {
+                    //     meshes.forEach((mesh, index) => {
+                    //         mesh.position = new BABYLON.Vector3(-120, 0, -12)
+                    //         mesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+                    //         mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+                    //         // mesh.showBoundingBox = true;
+                    //         mesh.checkCollisions = true
+                    //         mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+                    //     });
+                    // });
+
                     // var box1 = BABYLON.Mesh.CreateBox("box1", 5, scene);
                     // box1.scaling = new BABYLON.Vector3(3, 3, 3);
                     // box1.rotation.x = Math.PI/3;
@@ -217,8 +248,8 @@
                     
                     /*****************************Skybox********************************************/ 
 
-                    let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500}, scene)
-                    let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
+                    var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500}, scene)
+                    var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
                     skyboxMaterial.backFaceCulling = false
                     skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skybox/skybox", scene)
                     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
@@ -232,65 +263,6 @@
                     scene.fogColor = new BABYLON.Color3(0.7, 0.7, 1)
 
                     /*****************************End Skybox********************************************/
-
-                    /*********Animations*************/
-
-                    var frameRate = 20
-
-                    //for camera to sweep round
-                    var rotate = new BABYLON.Animation("rotate", "rotation.y", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                    
-                    var rotate_keys = []; 
-
-                    rotate_keys.push({
-                        frame: 0,
-                        value: 0
-                    });
-
-                    rotate_keys.push({
-                        frame: 9 * frameRate,
-                        value: 0
-                    });
-
-                    rotate_keys.push({
-                        frame: 14 * frameRate,
-                        value: Math. PI
-                    });
-
-                    rotate.setKeys(rotate_keys);
-                    
-                    //for camera move forward
-                    var movein = new BABYLON.Animation("movein", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
-                    
-                    var movein_keys = []; 
-
-                    movein_keys.push({
-                        frame: 0,
-                        value: new BABYLON.Vector3(0, 5, -30)
-                    });
-
-                    movein_keys.push({
-                        frame: 3 * frameRate,
-                        value: new BABYLON.Vector3(0, 2, -10)
-                    });
-
-                    movein_keys.push({
-                        frame: 5 * frameRate,
-                        value: new BABYLON.Vector3(0, 2, -10)
-                    });
-
-                    movein_keys.push({
-                        frame: 8 * frameRate,
-                        value: new BABYLON.Vector3(-2, 2, 3)
-                    });
-
-                    movein.setKeys(movein_keys);
-
-                    /*******Run Clips**********/
-
-                    // scene.beginDirectAnimation(camera, [movein, rotate], 0, 25 * frameRate, false);
-
-                    /*********End Animations*************/
 
                     /*****************************GUI********************************************/ 
 
@@ -359,7 +331,8 @@
 
                     var translate = function(mesh, direction, power) {
                         // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
-                        var maxSpeed = 50;
+                        // console.log("linear z: " + mesh.physicsImpostor.getLinearVelocity().z);
+                        var maxSpeed = 20;
 
                         // limit forward velocity speed
                         if (mesh.physicsImpostor.getLinearVelocity().x < -maxSpeed) 
@@ -372,6 +345,17 @@
                             mesh.physicsImpostor.setLinearVelocity(
                                 new BABYLON.Vector3( maxSpeed, mesh.physicsImpostor.getLinearVelocity().y, mesh.physicsImpostor.getLinearVelocity().z)
                             );
+
+                        // limit z velocity to prevent slippery floor
+                        // if (mesh.physicsImpostor.getLinearVelocity().z < -1) 
+                        //     mesh.physicsImpostor.setLinearVelocity(
+                        //         new BABYLON.Vector3( mesh.physicsImpostor.getLinearVelocity().x, mesh.physicsImpostor.getLinearVelocity().y, -1)
+                        //     );
+
+                        // if (mesh.physicsImpostor.getLinearVelocity().z > 1) 
+                        //     mesh.physicsImpostor.setLinearVelocity(
+                        //         new BABYLON.Vector3( mesh.physicsImpostor.getLinearVelocity().x, mesh.physicsImpostor.getLinearVelocity().y, 1)
+                        //     );
 
                         mesh.physicsImpostor.setLinearVelocity(
                             mesh.physicsImpostor.getLinearVelocity().add(
@@ -394,7 +378,21 @@
                     var left_indicator;
                     var right_indicator_turned_on = false;
                     var right_indicator;
-                    var carLightStartMaterial;
+
+                    var activeCamera = 1
+
+                    function changeCamera() {
+                        if(activeCamera === 1) {
+                            activeCamera = 2;
+                            camera.detachControl(canvas);
+                        }
+                        else if(activeCamera === 2) {
+                            activeCamera = 1;
+                            camera2.detachControl(canvas);
+                        }
+                        scene.activeCamera = activeCamera === 1 ? camera : camera2;
+                        activeCamera === 1 ? camera.attachControl(canvas, false) : camera2.attachControl(canvas, false)
+                    }
                     
                     window.addEventListener('keydown',function (e) {
                         if (!fail) {
@@ -418,34 +416,13 @@
                                     restart()
                                     break;
                                 case 81://q
-                                    right_indicator_turned_on = false
-                                    clearInterval(right_indicator)
-                                    if (!left_indicator_turned_on)
-                                        left_indicator = setInterval( function() { blink(0); }, 500 );
-                                    else {
-                                        clearInterval(left_indicator)
-                                        carLights.forEach((array, index) => {
-                                            array.forEach((mesh, index) => {
-                                                mesh.material = carLightStartMaterial
-                                            })
-                                        })
-                                    }
-                                    left_indicator_turned_on = !left_indicator_turned_on
+                                    blinkLeft()
                                     break;
                                 case 69://e
-                                    left_indicator_turned_on = false
-                                    clearInterval(left_indicator)
-                                    if (!right_indicator_turned_on)
-                                        right_indicator = setInterval( function() { blink(1); }, 500 );
-                                    else {
-                                        clearInterval(right_indicator)
-                                        carLights.forEach((array, index) => {
-                                            array.forEach((mesh, index) => {
-                                                mesh.material = carLightStartMaterial
-                                            })
-                                        })
-                                    }
-                                    right_indicator_turned_on = !right_indicator_turned_on
+                                    blinkRight()
+                                    break;
+                                case 86://v
+                                    changeCamera()
                                     break;
                             }
                         }
@@ -475,11 +452,204 @@
                                     break;
                                 case 69://e
                                     break;
+                                case 86://v
+                                    break;
                             }
                         }
                     });
 
                     /*****************************End Input********************************************/
+
+                    /*****************************Animations********************************************/
+
+                    var cutscene_mode = 0
+                    var flip = false
+
+                    var camera3 = new BABYLON.UniversalCamera("camera3",  new BABYLON.Vector3(0, 0, 0), scene);
+                    camera3.attachControl(scene, false)
+                    scene.activeCamera = camera3  
+
+                    var frameRate = 20
+
+                    /*************First Cutscene*************/
+
+                    activeCamera = 3
+                    car.physicsImpostor.dispose()
+                    image.alpha = 0
+                    image.isVisible = true
+
+                    var camera_rotate = new BABYLON.Animation("camera_rotate", "rotation", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    
+                    var camera_rotate_keys = []; 
+
+                    camera_rotate_keys.push({
+                        frame: 0,
+                        value: new BABYLON.Vector3(-9.8, -10, 0)
+                    });
+
+                    camera_rotate_keys.push({
+                        frame: 8 * frameRate,
+                        value: new BABYLON.Vector3(-9.8, -10, 0)
+                    });
+
+                    camera_rotate_keys.push({
+                        frame: 8 * frameRate,
+                        value: new BABYLON.Vector3(0.25,7.8,0)
+                    });
+
+                    camera_rotate_keys.push({
+                        frame: 12 * frameRate,
+                        value: new BABYLON.Vector3(0.25,7.8,0)
+                    });
+
+                    camera_rotate_keys.push({
+                        frame: 12 * frameRate,
+                        value: new BABYLON.Vector3(0.48,8.5,0)
+                    });
+
+                    camera_rotate_keys.push({
+                        frame: 14 * frameRate,
+                        value: new BABYLON.Vector3(0.48,8.5,0)
+                    });
+
+                    camera_rotate_keys.push({
+                        frame: 18 * frameRate,
+                        value: new BABYLON.Vector3(0.54,11.6,0)
+                    });
+
+                    camera_rotate.setKeys(camera_rotate_keys);
+                    
+                    var camera_position = new BABYLON.Animation("camera_position", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    
+                    var camera_position_keys = []; 
+
+                    camera_position_keys.push({
+                        frame: 0,
+                        value: new BABYLON.Vector3(20, 20, -30)
+                    });
+
+                    camera_position_keys.push({
+                        frame: 8 * frameRate,
+                        value: new BABYLON.Vector3(-80, 20, -30)
+                    });
+
+                    camera_position_keys.push({
+                        frame: 8 * frameRate,
+                        value: new BABYLON.Vector3(-108, 4, 4)
+                    });
+
+                    camera_position_keys.push({
+                        frame: 12 * frameRate,
+                        value: new BABYLON.Vector3(-108, 4, -1)
+                    });
+
+                    camera_position_keys.push({
+                        frame: 12 * frameRate,
+                        value: new BABYLON.Vector3(-120, 20, 20)
+                    });
+
+                    camera_position_keys.push({
+                        frame: 15 * frameRate,
+                        value: new BABYLON.Vector3(-120, 15, 20)
+                    });
+
+                    camera_position.setKeys(camera_position_keys);
+
+                    // car animation
+
+                    var car_move = new BABYLON.Animation("car_move", "position", frameRate, BABYLON.Animation.ANIMATIONTYPE_VECTOR3, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    
+                    var car_move_keys = []; 
+
+                    car_move_keys.push({
+                        frame: 0,
+                        value: new BABYLON.Vector3(0, 0, 0)
+                    });
+
+                    car_move_keys.push({
+                        frame: 8 * frameRate,
+                        value: new BABYLON.Vector3(-89, -0.5, 0)
+                    });
+
+                    car_move_keys.push({
+                        frame: 8 * frameRate + 1,
+                        value: new BABYLON.Vector3(-89, -0.5, 0)
+                    });
+
+                    car_move.setKeys(car_move_keys);
+
+                    var fadeout = new BABYLON.Animation("fadeout", "alpha", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
+                    
+                    var fadeout_keys = []; 
+
+                    fadeout_keys.push({
+                        frame: 0,
+                        value: 0
+                    });
+
+                    fadeout_keys.push({
+                        frame: 14 * frameRate,
+                        value: 0
+                    });
+
+                    fadeout_keys.push({
+                        frame: 15 * frameRate,
+                        value: 1
+                    });
+
+                    fadeout.setKeys(fadeout_keys);
+
+                    cutscene_mode = 1
+                    mf = true
+                    scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
+                    scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
+                    scene.beginDirectAnimation(image, [fadeout], 0, 25 * frameRate, false);
+
+                    function cutscene1Logic() {
+                        // console.log(camera3.position)
+                        if (cutscene_mode === 1) {
+                            if (camera3.position.x === -108 && !flip) {
+                                mf = false
+                                car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
+                                car.physicsImpostor.dispose()
+                                setTimeout(function () {
+                                    blinkRight()
+                                }, 300)
+                                flip = true
+                            }
+                            if (camera3.position.x === -120 && flip) {
+                                setTimeout(function () {
+                                    blinkRight()
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
+                                    rr = true
+                                    setTimeout(function () {
+                                        rr = false
+                                    }, 100)
+                                    setTimeout(function () {
+                                        mf = true
+                                        // var startTime = new Date().getTime();
+                                        // var interval = setInterval(() => {
+                                        //     if(new Date().getTime() - startTime > 2000){
+                                        //         clearInterval(interval);
+                                        //         // lanjut here
+                                                
+                                        //         return;
+                                        //     }
+                                        //     //do whatever here..
+                                        // }, 100);  
+                                    }, 1000)
+                                }, 200)
+                                flip = false
+                            }
+                        }
+                    }
+
+                    /*************End First Cutscene*************/
+
+                    /*************Second Cutscene*************/
+
+
+                    /********************************************End Animations********************************************/
 
                     var fail = false
                     var stopCarPhysicsTimeout;
@@ -547,10 +717,41 @@
                         }
                     }
 
-                    var rotation = 0.05
+                    function blinkLeft() {
+                        right_indicator_turned_on = false
+                        clearInterval(right_indicator)
+                        if (!left_indicator_turned_on)
+                            left_indicator = setInterval( function() { blink(0); }, 500 );
+                        else {
+                            clearInterval(left_indicator)
+                            carLights.forEach((array, index) => {
+                                array.forEach((mesh, index) => {
+                                    mesh.material = carLightStartMaterial
+                                })
+                            })
+                        }
+                        left_indicator_turned_on = !left_indicator_turned_on
+                    }
+
+                    function blinkRight() {
+                        left_indicator_turned_on = false
+                        clearInterval(left_indicator)
+                        if (!right_indicator_turned_on)
+                            right_indicator = setInterval( function() { blink(1); }, 500 );
+                        else {
+                            clearInterval(right_indicator)
+                            carLights.forEach((array, index) => {
+                                array.forEach((mesh, index) => {
+                                    mesh.material = carLightStartMaterial
+                                })
+                            })
+                        }
+                        right_indicator_turned_on = !right_indicator_turned_on
+                    }
 
                     function update() { // function for codes that needs constant loop
-                        // add thrust to car physics
+
+                        // input, add thrust to car physics
                         if (mf == true) {
                             translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
                             if (carWheels[0].rotation.y < -0.05)
@@ -569,16 +770,16 @@
                             if (carWheels[0].rotation.y < -0.5) {
                             }
                             else {
-                                carWheels[0].rotation.y += -rotation
-                                carWheels[1].rotation.y += -rotation
+                                carWheels[0].rotation.y += -0.05
+                                carWheels[1].rotation.y += -0.05
                             }
                         }
                         if (rr == true) {
                             if (carWheels[0].rotation.y > 0.5) {
                             }
                             else {
-                                carWheels[0].rotation.y += rotation
-                                carWheels[1].rotation.y += rotation
+                                carWheels[0].rotation.y += 0.05
+                                carWheels[1].rotation.y += 0.05
                             }
                         }
                         if (brake == true) {
@@ -588,21 +789,26 @@
                                 translate(car, new BABYLON.Vector3(1, 0, 0), -1);
                         }
 
+                        // car wheel rotation physics
+                        if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
+                            carWheels.forEach((mesh, index) => {
+                                if (index%2)
+                                mesh.rotation.z += car.physicsImpostor.getLinearVelocity().x/16
+                                else 
+                                mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().x/16
+                            })
+                        }
+
+                        // cutscene
+                        if (cutscene_mode > 0) {
+                            cutscene1Logic()
+                        }
+                        
                         // limit camera zoom
                         if (camera.radius > 40)
                             camera.radius = 40;
                         if (camera.radius < 20)
                             camera.radius = 20;
-
-                        // car wheel rotation physics
-                        if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
-                            carWheels.forEach((mesh, index) => {
-                                if (index%2)
-                                    mesh.rotation.z += car.physicsImpostor.getLinearVelocity().x/16
-                                else 
-                                    mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().x/16
-                            })
-                        }
                     }
 
                     scene.registerBeforeRender(function () {
