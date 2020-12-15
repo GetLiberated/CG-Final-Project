@@ -106,7 +106,7 @@
                     var carWheels = []
                     var carLights = [[], []]
                     var carLightStartMaterial;
-                    var carSterringWheel;
+                    var carSteeringWheel;
                     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
                         meshes.forEach((mesh, index) => {
                             mesh.parent = car
@@ -183,7 +183,8 @@
                             }
 
                             if (index == 420) {
-                                carSterringWheel = mesh
+                                carSteeringWheel = mesh
+                                // mesh.dispose()
                             }
 
                             if (index == 438) {
@@ -201,9 +202,10 @@
                                 mesh.material = mat;
                             }
 
-                            if (index == 49 || index == 293) {
+                            if (index == 293 || index == 36 || index == 68 || index == 263) {
                                 var mat = new BABYLON.StandardMaterial('mat', scene);
                                 mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/218411094_tp.jpg");
+                                mat.diffuseTexture.vAng = Math.PI; 
                                 mesh.material = mat;
                             }
                             
@@ -918,7 +920,7 @@
                             else {
                                 carWheels[0].rotation.y += -0.05
                                 carWheels[1].rotation.y += -0.05
-                                carSterringWheel.rotation.x += -0.05
+                                carSteeringWheel.rotation.x += -0.05
                             }
                         }
                         if (rr == true) {
@@ -927,7 +929,7 @@
                             else {
                                 carWheels[0].rotation.y += 0.05
                                 carWheels[1].rotation.y += 0.05
-                                carSterringWheel.rotation.x += 0.05
+                                carSteeringWheel.rotation.x += 0.05
                             }
                         }
                         if (brake == true) {
