@@ -344,6 +344,10 @@
                                 carWheels[0].rotation.y = 0
                                 carWheels[1].rotation.y = Math.PI
                                 carSteeringWheel.rotation.x = -0.15
+                                if (right_indicator_turned_on)
+                                blinkRight()
+                                if (left_indicator_turned_on)
+                                blinkLeft()
 
                                 // reset camera
                                 camera.alpha = cameraStartAlpha;
@@ -405,6 +409,7 @@
 
                             function level1(right_indicator_turned_on) {
                                 if (car.position.z < -30) {
+                                    task_text.color = "white"
                                     lose()
                                 }
                                 if (car.position.x < -90 && task_text.color !== "green") {
