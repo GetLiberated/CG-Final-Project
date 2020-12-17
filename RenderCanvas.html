@@ -10,6 +10,7 @@
         <script src="./javascript/physics.js"></script>
         <script src="./javascript/car.js"></script>
         <script src="./javascript/animation.js"></script>
+        <script src="./javascript/shader.js"></script>
         <style>
             html,body {
                 overflow: hidden;
@@ -160,8 +161,7 @@
                             }
 
                             if (index == 420) {
-                                carSteeringWheel = mesh
-                                // mesh.dispose()
+                                mesh.dispose()
                             }
 
                             if (index == 438) {
@@ -251,6 +251,25 @@
                                 carWheel4.rotation = new BABYLON.Vector3(0, Math.PI, 0)
                                 carWheels.push(carWheel4)
                             })
+
+                            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Steer.obj", scene, (meshes) => {
+                                meshes.forEach((mesh, index) => {
+                                    mesh.parent = car
+                                    mesh.position = new BABYLON.Vector3(-3, 3.5, 1.3)
+                                    mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
+                                    mesh.rotation = new BABYLON.Vector3(-0.15, 0, 0)
+                                    carSteeringWheel = mesh
+                                })
+                            })
+
+                            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Stay still.obj", scene, (meshes) => {
+                                meshes.forEach((mesh, index) => {
+                                    mesh.parent = car
+                                    mesh.position = new BABYLON.Vector3(-3.1, 3.5, 1.3)
+                                    mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
+                                    mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+                                })
+                            })
                         });
                     
                     /*****************************End Export Car Model********************************************/
@@ -299,6 +318,10 @@
                     //         mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
                     //     });
                     // });
+
+                    var boom = BABYLON.Mesh.CreateSphere()
+                    var shader = createShader()
+                    boom.material = shader
 
                     // var box1 = BABYLON.Mesh.CreateBox("box1", 5, scene);
                     // box1.scaling = new BABYLON.Vector3(3, 3, 3);
@@ -412,6 +435,14 @@
                     image.alpha = 0.5
                     image.isVisible = false
                     gui.addControl(image);    
+
+                    // win screen
+                    var check = new BABYLON.GUI.Image("", "./assets/check.png");
+                    check.isVisible = false
+                    check.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM
+                    check.width = 0.2
+                    check.height = 0.2
+                    gui.addControl(check);  
                     
                     // lose screen
                     var text1 = new BABYLON.GUI.TextBlock();
@@ -436,14 +467,6 @@
                         restart()
                     });
                     gui.addControl(button); 
-
-                    // win screen
-                    var check = new BABYLON.GUI.Image("", "./assets/check.png");
-                    check.isVisible = false
-                    check.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM
-                    check.width = 0.2
-                    check.height = 0.2
-                    gui.addControl(check);  
 
                     /*****************************End GUI********************************************/
 
@@ -522,10 +545,10 @@
                                                 }
                                             });
                                         });
-                                        car.physicsImpostor.registerOnPhysicsCollide(sphere.physicsImpostor, function(main, collided) {
+                                        car.physicsImpostor.registerOnPhysicsCollide(goal.physicsImpostor, function(main, collided) {
                                             if (!fail) {
                                                 task2_text.color = "green"
-                                                sphere.physicsImpostor.dispose()
+                                                goal.physicsImpostor.dispose()
                                                 win()
                                             }
                                         });
@@ -537,7 +560,7 @@
                         }
                     }
 
-                    cutscene1()
+                    // cutscene1()
 
                     /*************End Cutscene 1*************/
 
@@ -548,28 +571,52 @@
 
                     /*****************************Level 1**********************************************/
 
-                    // create goal sphere
-                    var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
-                    sphere.position = new BABYLON.Vector3(-145, 2, 46);
+                    // create goal
+                    var goal = BABYLON.MeshBuilder.CreateCylinder("goal", {height: 20, diameter: 8});
+                    goal.position = new BABYLON.Vector3(-144, 2, 46);
 
-                    // create pbr material for sphere
-                    var pbr = new BABYLON.PBRMetallicRoughnessMaterial("pbr", scene);
-                    sphere.material = pbr;
-                    pbr.baseColor = new BABYLON.Color3(1.0, 0.766, 0.336);
-                    pbr.metallic = 1.0;
-                    pbr.roughness = 0.0;
-                    pbr.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("/assets/environment.dds", scene);
+                    // create material for goal
+                    var mat = new BABYLON.StandardMaterial()
+                    goal.material = mat
+                    goal.material.diffuseColor = new BABYLON.Color3(1, 1, 0)
+                    goal.material.alpha = 0.7
+
+                    // var nodeMaterial = new BABYLON.NodeMaterial("nodeMat", scene, {
+                    //     emitComments: true
+                    // });
+                    // nodeMaterial.loadAsync("https://gist.githubusercontent.com/dannybucksch/8c1e194a526b8420039481dceb77995d/raw/e75f2d3bbda4ea2528d2995c613bec50595cdf4e/mouse_sine.json").then(() => {
+                    //     nodeMaterial.build(true);
+                    //     nodeMaterial.needDepthPrePass = true;
+                    //     nodeMaterial.backFaceCulling = false;
+
+                    //     goal.material = nodeMaterial;
+                    // })
+
+                    var godrays = new BABYLON.VolumetricLightScatteringPostProcess(
+                        "godrays",
+                        1.0,
+                        camera,
+                        goal,
+                        100,
+                        BABYLON.Texture.BILINEAR_SAMPLINGMODE,
+                        engine,
+                        false
+                    );
+                    godrays.exposure = 0.1;
+                    godrays.decay = 0.96815;
+                    godrays.weight = 0.58767;
+                    godrays.density = 0.926;
                     
-                    // add physics to sphere for collision detection
-                    sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+                    // add physics to goal for collision detection
+                    goal.physicsImpostor = new BABYLON.PhysicsImpostor(goal, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
 
-                    // attach goal gui to sphere
-                    rect1.linkWithMesh(sphere);   
-                    line.linkWithMesh(sphere);   
-                    target.linkWithMesh(sphere);   
+                    // attach goal gui to goal
+                    rect1.linkWithMesh(goal);   
+                    line.linkWithMesh(goal);   
+                    target.linkWithMesh(goal);   
 
                     function level1() {
-                        if (car.position.x < -90 && !task_text.color !== "green") {
+                        if (car.position.x < -90 && task_text.color !== "green") {
                             lose()
                         }
                         else if (right_indicator_turned_on) {
@@ -763,6 +810,7 @@
                         car.rotationQuaternion = carStartRotation.clone();
                         carWheels[0].rotation.y = 0
                         carWheels[1].rotation.y = Math.PI
+                        carSteeringWheel.rotation.x = -0.15
 
                         // reset camera
                         camera.alpha = cameraStartAlpha;
@@ -797,17 +845,25 @@
                         fail = true
                     }
 
+                    var maxSpeed = 20;
+
                     function update() { // function for codes that needs constant loop
 
                         // console.log(car.position)
+                        // console.log(car.physicsImpostor.getLinearVelocity())
 
                         // input, add thrust to car physics
                         if (mf == true) {
                             translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
+                            // if (car.physicsImpostor.getLinearVelocity().x < -maxSpeed) {}
+                            // else car.physicsImpostor.applyImpulse(new BABYLON.Vector3(-1, 0, 0).scale(1), car.getAbsolutePosition().add(BABYLON.Vector3.Zero()));
+
                             if (carWheels[0].rotation.y < -0.05)
                                 rotate(car, new BABYLON.Vector3(0, -1, 0), -carWheels[0].rotation.y/4);
+                                // car.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 1).scale(0.1), car.getAbsolutePosition());
                             if (carWheels[0].rotation.y > 0.05)
                                 rotate(car, new BABYLON.Vector3(0, 1, 0), carWheels[0].rotation.y/4);
+                                // car.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, -1).scale(1), car.getAbsolutePosition());
                         }
                         if (mb == true) {
                             translate(car, new BABYLON.Vector3(1, 0, 0), 1);
@@ -839,7 +895,11 @@
                                 translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
                             if (car.physicsImpostor.getLinearVelocity().x > 0) 
                                 translate(car, new BABYLON.Vector3(1, 0, 0), -1);
-                            if (car.physicsImpostor.getLinearVelocity().x === 0) {}
+                            if (car.physicsImpostor.getLinearVelocity().x === 0) {
+                                car.physicsImpostor.setLinearVelocity(
+                                    new BABYLON.Vector3.Zero()
+                                );
+                            }
                         }
 
                         // car wheel rotation physics
