@@ -1,897 +1,783 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Car Driving</title>
-        <script src="https://cdn.babylonjs.com/babylon.js"></script>
-        <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
-        <script src="https://cdn.babylonjs.com/Oimo.js"></script>
-        <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
-        <script src="./javascript/physics.js"></script>
-        <script src="./javascript/car.js"></script>
-        <script src="./javascript/animation.js"></script>
-        <style>
-            html,body {
-                overflow: hidden;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            #canvas {
-                width: 100%;
-                height: 100%;
-                touch-action: none;
-            }
-        </style>
-    </head>
-    <body>
-        <canvas id ="canvas"></canvas>
-        <script>
-            window.addEventListener("DOMContentLoaded", function(){
-                var canvas = document.getElementById("canvas");
-                var engine = new BABYLON.Engine(canvas, true);
 
-                // flex that engine
-                engine.displayLoadingUI();
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-                var createScene = function() {
-                    var scene = new BABYLON.Scene(engine);
+    <title>Car Simulator</title>
 
-                    // enable debug mode
-                    // scene.debugLayer.show()
+    <!-- Babylon.js -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/Oimo.js"></script>
+    <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
 
-                    // enable physics
-                    scene.enablePhysics(new BABYLON.Vector3(0,-32, 0), new BABYLON.OimoJSPlugin());
-                       
-                    // camera
-                    var camera = new BABYLON.ArcRotateCamera("camera1",  0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
-                    camera.setPosition(new BABYLON.Vector3(25, 10, 0));	  
-                    camera.attachControl(canvas, true)
-                    camera.inputs.attached.pointers.buttons = [0] // disable right mouse button drag
-                    camera.lowerRadiusLimit = 20
-                    camera.upperRadiusLimit = 40
-                    var cameraStartAlpha = camera.alpha
-                    var cameraStartBeta = camera.beta
-                    var cameraStartRadius = camera.radius
-                    camera.checkCollisions = true;
+    <!-- Local js -->
+    <script src="./javascript/physics.js"></script>
+    <script src="./javascript/car.js"></script>
+    <script src="./javascript/map.js"></script>
+    <script src="./javascript/animation.js"></script>
+    <script src="./javascript/shader.js"></script>
 
-                    // fps camera
-                    var camera2 = new BABYLON.UniversalCamera("camera2", new BABYLON.Vector3(0, 0, 0), scene);
-                    camera2.position = new BABYLON.Vector3(0.2, 4.5, 1);
-                    camera2.rotation = new BABYLON.Vector3(0, 4.68, 0);
-                    
-                    // lights
-                    var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
-                    var light2 = new BABYLON.HemisphericLight("light2", new BABYLON.Vector3(0, 1, 0), scene);
-                    light2.intensity = 0.75;
+    <style>
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-                    // glow layer
-                    var gl = new BABYLON.GlowLayer("glow", scene, { 
-                        mainTextureFixedSize: 1024,
-                        blurKernelSize: 64
-                    });
-                    
-                    // car
-                    var car = createCar(scene)
-                    camera.parent = car;
-                    camera2.parent = car
-                    var carStartRotation = car.rotationQuaternion.clone();
-                    
-                    /*****************************Export Car Model********************************************/
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+</head>
 
-                    var carWheels = []
-                    var carLights = [[], []]
-                    var carLightStartMaterial;
-                    var carSteeringWheel;
-                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
-                        meshes.forEach((mesh, index) => {
-                            mesh.parent = car
-                            mesh.position = new BABYLON.Vector3(-2, 0, 0)
-                            mesh.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
-                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+<body>
+    <canvas id="renderCanvas"></canvas>
+    <script>
+        var canvas = document.getElementById("renderCanvas");
+        var engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true,  disableWebGL2Support: false});
 
-                            var wheelIndex = [562,570,573,542,553,594,579,584,592,603,608,610,596,600,598,606,604,602,564,568,566,572,576,574,586,590,580,578,582,588,550,558,548,560,554,546,556,544,552]
-                            wheelIndex.forEach(i => {
-                                if (i == index) {
-                                    mesh.dispose()
-                                }
-                            })
+        var createScene = function () {
+                            var scene = new BABYLON.Scene(engine);
 
-                            var leftLightIndex = [474, 506, 231]
-                            leftLightIndex.forEach(i => {
-                                if (i == index) {
-                                    var mat = new BABYLON.StandardMaterial('mat', scene);
-                                    mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/GLBK11.jpg");
-                                    mat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
-                                    mat.backFaceCulling = false
-                                    mesh.material = mat;
-                                    carLightStartMaterial = mat
-                                    carLights[0].push(mesh)
-                                }
-                            })
+                            // enable physics
+                            scene.enablePhysics(new BABYLON.Vector3(0, -32, 0), new BABYLON.OimoJSPlugin());
 
-                            var rightLightIndex = [462, 496, 215]
-                            rightLightIndex.forEach(i => {
-                                if (i == index) {
-                                    var mat = new BABYLON.StandardMaterial('mat', scene);
-                                    mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/GLBK11.jpg");
-                                    mat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
-                                    mat.backFaceCulling = false
-                                    mesh.material = mat;
-                                    carLights[1].push(mesh)
-                                }
-                            })
+                            // camera
+                            var camera = new BABYLON.ArcRotateCamera("camera1", 0, 0, 20, new BABYLON.Vector3(0, 0, 0), scene);
+                            camera.setPosition(new BABYLON.Vector3(25, 10, 0));
+                            camera.attachControl(canvas, true)
+                            camera.inputs.attached.pointers.buttons = [0] // disable right mouse button drag
+                            camera.lowerRadiusLimit = 20 // limit zoom in scroll
+                            camera.upperRadiusLimit = 40 // limit zoom out scroll
+                            var cameraStartAlpha = camera.alpha
+                            var cameraStartBeta = camera.beta
+                            var cameraStartRadius = camera.radius
+                            camera.checkCollisions = true;
 
-                            if (index == 13 || index == 32 || index == 239) {
-                                var pbr = new BABYLON.PBRMaterial("pbr", scene);
-                                mesh.material = pbr;
+                            // fps camera
+                            var camera2 = new BABYLON.UniversalCamera("camera2", new BABYLON.Vector3(0, 0, 0), scene);
+                            camera2.position = new BABYLON.Vector3(0.2, 4.5, 1);
+                            camera2.rotation = new BABYLON.Vector3(0, 4.68, 0);
 
-                                pbr.metallic = 0.0;
-                                pbr.roughness = 0;   
-                                pbr.albedoTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/AS2_carpaint_metallic.jpg");
-                                pbr.backFaceCulling = false
-                            }
+                            // lights
+                            var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
+                            var light2 = new BABYLON.HemisphericLight("light2", new BABYLON.Vector3(0, 1, 0), scene);
+                            light2.intensity = 0.75;
 
-                            if (index == 446 || index == 24) {
-                                var glass = new BABYLON.PBRMaterial("glass", scene);
-                                glass.alpha = 0.5;
-                                glass.reflectivityColor = new BABYLON.Color3(0.2, 0.2, 0.2);
-                                glass.albedoColor = new BABYLON.Color3(0.95, 0.95, 0.95);
-                                glass.backFaceCulling = false
-                                mesh.material = glass;
-                            }
-
-                            var rightLightIndex = [434, 536, 538, 540]
-                            rightLightIndex.forEach(i => {
-                                if (i == index) {
-                                    var mat = new BABYLON.StandardMaterial('mat', scene);
-                                    mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/AS2_leather_06.jpg");
-                                    mat.diffuseColor = new BABYLON.Color3(1, 0.8, 0);
-                                    mesh.material = mat;
-                                }
-                            })
-
-                            if (index == 109) {
-                                var mat = new BABYLON.StandardMaterial('mat', scene);
-                                mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/Metals.Ornamental Metals.Plate.Mesh.cutout.jpg");
-                                mat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
-                                mesh.material = mat;
-                            }
-
-                            if (index == 420) {
-                                carSteeringWheel = mesh
-                                // mesh.dispose()
-                            }
-
-                            if (index == 438) {
-                                var mat = new BABYLON.StandardMaterial('mat', scene);
-                                mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/SpeedWin.jpg");
-                                mat.diffuseTexture.wAng = Math.PI/2; 
-                                mesh.material = mat;
-                            }
-
-                            if (index == 440) {
-                                var mat = new BABYLON.StandardMaterial('mat', scene);
-                                mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/computer.jpg");
-                                mat.diffuseTexture.wAng = -Math.PI/2; 
-                                mat.diffuseTexture.vAng = Math.PI; 
-                                mesh.material = mat;
-                            }
-
-                            if (index == 293 || index == 36 || index == 68 || index == 263) {
-                                var mat = new BABYLON.StandardMaterial('mat', scene);
-                                mat.diffuseTexture = new BABYLON.Texture("./assets/Volkswagen Touareg 2/textures/218411094_tp.jpg");
-                                mat.diffuseTexture.vAng = Math.PI; 
-                                mesh.material = mat;
-                            }
-                            
-
-                            if (index == 350) {
-                                //Ensure working with new values for glass by computing and obtaining its worldMatrix
-                                mesh.computeWorldMatrix(true);
-                                var glass_worldMatrix = mesh.getWorldMatrix();
-                            
-                                //Obtain normals for plane and assign one of them as the normal
-                                var glass_vertexData = mesh.getVerticesData("normal");
-                                var glassNormal = new BABYLON.Vector3(glass_vertexData[0], glass_vertexData[1], glass_vertexData[2]);	
-                                //Use worldMatrix to transform normal into its current value
-                                glassNormal = new BABYLON.Vector3.TransformNormal(glassNormal, glass_worldMatrix)
-                            
-                                //Create reflecting surface for mirror surface
-                                var reflector = new BABYLON.Plane.FromPositionAndNormal(mesh.position, glassNormal.scale(-1));
-                                
-                                //Create the mirror material
-                                var mirrorMaterial = new BABYLON.StandardMaterial("mirror", scene);
-                                mirrorMaterial.reflectionTexture = new BABYLON.MirrorTexture("mirror", 1024, scene, true);
-                                mirrorMaterial.reflectionTexture.mirrorPlane = reflector;
-                                mirrorMaterial.reflectionTexture.renderList = meshes;
-                                mirrorMaterial.reflectionTexture.level = 1;
-                            
-                                // mesh.material = mirrorMaterial;
-                            }
-
-                                // mesh identifier
-
-                                // mesh.showBoundingBox = true;
-                                // mesh.actionManager = new BABYLON.ActionManager(scene);
-                                // mesh.actionManager.registerAction(
-                                //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
-                                //         function(event) {
-                                //             console.log(index);
-                                //             mesh.dispose()
-                                //         }
-                                //     )
-                                // )
-                                
-                        });
-
-                            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Volkswagen Touareg 2/model/", "Tire.obj", scene, (meshes) => {
-                                var carWheel = BABYLON.Mesh.MergeMeshes(meshes, true, true, undefined, false, true)
-                                carWheel.parent = car
-                                carWheel.position = new BABYLON.Vector3(-7, 1.2, 2.8)
-                                carWheel.scaling = new BABYLON.Vector3(0.0035, 0.0035, 0.0035);
-                                carWheel.rotation = new BABYLON.Vector3(0, 0, 0)
-                                carWheels.push(carWheel)
-                                
-                                var carWheel2 = carWheel.createInstance()
-                                carWheel2.parent = car
-                                carWheel2.position = new BABYLON.Vector3(-7, 1.2, -2.94)
-                                carWheel2.rotation = new BABYLON.Vector3(0, Math.PI, 0)
-                                carWheels.push(carWheel2)
-
-                                var carWheel3 = carWheel.createInstance()
-                                carWheel3.parent = car
-                                carWheel3.position = new BABYLON.Vector3(3, 1.2, 2.8)
-                                carWheels.push(carWheel3)
-
-                                var carWheel4 = carWheel.createInstance()
-                                carWheel4.parent = car
-                                carWheel4.position = new BABYLON.Vector3(3, 1.2, -2.94)
-                                carWheel4.rotation = new BABYLON.Vector3(0, Math.PI, 0)
-                                carWheels.push(carWheel4)
-                            })
-                        });
-                    
-                    /*****************************End Export Car Model********************************************/
-
-                    /*****************************Map********************************************/
-
-                    var mapMeshes;
-                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Objects Real.obj", scene, (meshes) => {
-                        mapMeshes = meshes
-                        meshes.forEach((mesh, index) => {
-                            mesh.position = new BABYLON.Vector3(0, 0, 0)
-                            mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
-                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
-                            // mesh.showBoundingBox = true;
-                            mesh.checkCollisions = true
-                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
-
-                            // check for collisions
-                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
-                                if (!fail) {
-                                    // console.log(collided.object.name)
-                                    lose()
-                                }
+                            // glow layer
+                            var gl = new BABYLON.GlowLayer("glow", scene, {
+                                mainTextureFixedSize: 1024,
+                                blurKernelSize: 64
                             });
-                        });
-                    });
 
-                    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Road.obj", scene, (meshes) => {
-                        meshes.forEach((mesh, index) => {
-                            mesh.position = new BABYLON.Vector3(0, 0, 0)
-                            mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
-                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
-                            // mesh.showBoundingBox = true;
-                            mesh.checkCollisions = true
-                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.8}, scene);
-                        });
-                    });
+                            // car
+                            var car = createCar(scene)
+                            camera.parent = car;
+                            camera2.parent = car
+                            var carStartRotation = car.rotationQuaternion.clone();
+                            importCarModel(scene, car)
 
-                    // new BABYLON.SceneLoader.ImportMesh(null, "./assets/traffic light/", "traffic light.obj", scene, (meshes) => {
-                    //     meshes.forEach((mesh, index) => {
-                    //         mesh.position = new BABYLON.Vector3(-120, 0, -12)
-                    //         mesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-                    //         mesh.rotation = new BABYLON.Vector3(0, 0, 0)
-                    //         // mesh.showBoundingBox = true;
-                    //         mesh.checkCollisions = true
-                    //         mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
-                    //     });
-                    // });
+                            // map
+                            createMap(scene, car, fail, lose)
 
-                    // var box1 = BABYLON.Mesh.CreateBox("box1", 5, scene);
-                    // box1.scaling = new BABYLON.Vector3(3, 3, 3);
-                    // box1.rotation.x = Math.PI/3;
-                    // box1.rotation.y = -190;
-                    // box1.position.x -= 100;
-                    // box1.position.y -= 3;
-                    // box1.physicsImpostor = new BABYLON.PhysicsImpostor(box1,BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, friction: 0.01, restitution: 0 }, scene);
+                            /*****************************GUI********************************************/
 
-                    /*****************************End Map********************************************/ 
-                    
-                    /*****************************Skybox********************************************/ 
+                            var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
 
-                    var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500}, scene)
-                    var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
-                    skyboxMaterial.backFaceCulling = false
-                    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skybox/skybox", scene)
-                    skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
+                            // goal
+                            var rect1 = new BABYLON.GUI.Rectangle();
+                            rect1.width = "80px";
+                            rect1.height = "40px";
+                            rect1.cornerRadius = 20;
+                            rect1.color = "orange";
+                            rect1.thickness = 4;
+                            rect1.background = "orange";
+                            gui.addControl(rect1);
+                            rect1.linkOffsetY = -150;
 
-                    skybox.infiniteDistance = true
-                    skyboxMaterial.disableLighting = true
-                    skybox.material = skyboxMaterial
+                            var label = new BABYLON.GUI.TextBlock();
+                            label.text = "Goal";
+                            label.color = "white"
+                            rect1.addControl(label);
 
-                    scene.fogMode = BABYLON.Scene.FOGMODE_EXP
-                    scene.fogDensity = 0.002
-                    scene.fogColor = new BABYLON.Color3(0.7, 0.7, 1)
+                            var target = new BABYLON.GUI.Ellipse();
+                            target.width = "30px";
+                            target.height = "30px";
+                            target.color = "orange";
+                            target.thickness = 4;
+                            target.background = "orange";
+                            gui.addControl(target);
 
-                    /*****************************End Skybox********************************************/
+                            var line = new BABYLON.GUI.Line();
+                            line.lineWidth = 4;
+                            line.color = "orange";
+                            line.y2 = 10;
+                            line.linkOffsetY = -10;
+                            gui.addControl(line);
+                            line.connectedControl = rect1;
 
-                    /*****************************GUI********************************************/ 
+                            // objective
+                            var rect = new BABYLON.GUI.Rectangle();
+                            rect.width = "400px";
+                            rect.height = "150px";
+                            rect.cornerRadius = 20;
+                            rect.background = "black";
+                            rect.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                            rect.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                            rect.paddingTop = "10px"
+                            rect.paddingLeft = "10px"
+                            rect.alpha = 0.6
+                            gui.addControl(rect);
 
-                    var gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+                            var objective_text = new BABYLON.GUI.TextBlock();
+                            objective_text.text = "Objective";
+                            objective_text.color = "white";
+                            objective_text.fontSize = 36;
+                            objective_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                            objective_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                            objective_text.paddingTop = "16px"
+                            objective_text.paddingLeft = "20px"
+                            gui.addControl(objective_text);
 
-                    // goal
-                    var rect1 = new BABYLON.GUI.Rectangle();
-                    rect1.width = "80px";
-                    rect1.height = "40px";
-                    rect1.cornerRadius = 20;
-                    rect1.color = "orange";
-                    rect1.thickness = 4;
-                    rect1.background = "orange";
-                    gui.addControl(rect1);
-                    rect1.linkOffsetY = -150;
+                            var task_text = new BABYLON.GUI.TextBlock();
+                            task_text.text = "Blink right before perempatan";
+                            task_text.color = "white";
+                            task_text.fontSize = 24;
+                            task_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                            task_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                            task_text.top = 80
+                            task_text.left = 20
+                            gui.addControl(task_text);
 
-                    var label = new BABYLON.GUI.TextBlock();
-                    label.text = "Goal";
-                    label.color = "white"
-                    rect1.addControl(label);
+                            var task2_text = new BABYLON.GUI.TextBlock();
+                            task2_text.text = "Reach goal";
+                            task2_text.color = "white";
+                            task2_text.fontSize = 24;
+                            task2_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                            task2_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                            task2_text.top = 110
+                            task2_text.left = 20
+                            gui.addControl(task2_text);
 
-                    var target = new BABYLON.GUI.Ellipse();
-                    target.width = "30px";
-                    target.height = "30px";
-                    target.color = "orange";
-                    target.thickness = 4;
-                    target.background = "orange";
-                    gui.addControl(target);
+                            // overlay
+                            var dark_overlay = new BABYLON.GUI.Image("", "./assets/black.png");
+                            dark_overlay.alpha = 0.5
+                            dark_overlay.isVisible = false
+                            gui.addControl(dark_overlay);
 
-                    var line = new BABYLON.GUI.Line();
-                    line.lineWidth = 4;
-                    line.color = "orange";
-                    line.y2 = 10;
-                    line.linkOffsetY = -10;
-                    gui.addControl(line);
-                    line.connectedControl = rect1;  
+                            // win screen
+                            var check = new BABYLON.GUI.Image("", "./assets/check.png");
+                            check.isVisible = false
+                            check.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM
+                            check.width = 0.2
+                            check.height = 0.2
+                            gui.addControl(check);
 
-                    // objective
-                    var rect = new BABYLON.GUI.Rectangle();
-                    rect.width = "400px";
-                    rect.height = "150px";
-                    rect.cornerRadius = 20;
-                    rect.background = "black";
-                    rect.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                    rect.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                    rect.paddingTop = "10px"
-                    rect.paddingLeft= "10px"
-                    rect.alpha = 0.6
-                    gui.addControl(rect);   
+                            // lose screen
+                            var text1 = new BABYLON.GUI.TextBlock();
+                            text1.text = "You failed";
+                            text1.color = "white";
+                            text1.fontSize = 80;
+                            text1.top = "-100px"
+                            text1.isVisible = false
+                            gui.addControl(text1);
 
-                    var objective_text = new BABYLON.GUI.TextBlock();
-                    objective_text.text = "Objective";
-                    objective_text.color = "white";
-                    objective_text.fontSize = 36;
-                    objective_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                    objective_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                    objective_text.paddingTop = "16px"
-                    objective_text.paddingLeft= "20px"
-                    gui.addControl(objective_text); 
+                            var button = BABYLON.GUI.Button.CreateSimpleButton("", "Retry");
+                            button.width = 0.2;
+                            button.height = "40px";
+                            button.color = "white";
+                            button.background = "red";
+                            button.isVisible = false
+                            button.onPointerClickObservable.add(function () {
+                                dark_overlay.isVisible = false
+                                text1.isVisible = false
+                                button.isVisible = false
+                                window.clearTimeout(stopCarPhysicsTimeout)
+                                restart()
+                            });
+                            gui.addControl(button);
 
-                    var task_text = new BABYLON.GUI.TextBlock();
-                    task_text.text = "Blink right before perempatan";
-                    task_text.color = "white";
-                    task_text.fontSize = 24;
-                    task_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                    task_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                    task_text.top = 80
-                    task_text.left = 20
-                    gui.addControl(task_text); 
+                            /*****************************End GUI********************************************/
 
-                    var task2_text = new BABYLON.GUI.TextBlock();
-                    task2_text.text = "Reach goal";
-                    task2_text.color = "white";
-                    task2_text.fontSize = 24;
-                    task2_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                    task2_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                    task2_text.top = 110
-                    task2_text.left = 20
-                    gui.addControl(task2_text); 
+                            /*****************************Animations********************************************/
 
-                    // overlay
-                    var image = new BABYLON.GUI.Image("", "./assets/black.png");
-                    image.alpha = 0.5
-                    image.isVisible = false
-                    gui.addControl(image);    
-                    
-                    // lose screen
-                    var text1 = new BABYLON.GUI.TextBlock();
-                    text1.text = "You failed";
-                    text1.color = "white";
-                    text1.fontSize = 80;
-                    text1.top = "-100px"
-                    text1.isVisible = false
-                    gui.addControl(text1); 
+                            var cutscene = 0
+                            var camera3 = new BABYLON.UniversalCamera("camera3", new BABYLON.Vector3(0, 0, 0), scene);
+                            var frameRate = 20
+                            var flip = false
 
-                    var button = BABYLON.GUI.Button.CreateSimpleButton("", "Retry");
-                    button.width = 0.2;
-                    button.height = "40px";
-                    button.color = "white";
-                    button.background = "red";
-                    button.isVisible = false
-                    button.onPointerClickObservable.add(function () {
-                        image.isVisible = false
-                        text1.isVisible = false
-                        button.isVisible = false
-                        window.clearTimeout(stopCarPhysicsTimeout)
-                        restart()
-                    });
-                    gui.addControl(button); 
+                            // Win Cutscene
 
-                    // win screen
-                    var check = new BABYLON.GUI.Image("", "./assets/check.png");
-                    check.isVisible = false
-                    check.stretch = BABYLON.GUI.Image.STRETCH_UNIFORM
-                    check.width = 0.2
-                    check.height = 0.2
-                    gui.addControl(check);  
+                            function winCutscene() {
+                                dark_overlay.alpha = 0
+                                dark_overlay.isVisible = true
+                                check.alpha = 0
+                                check.isVisible = true
 
-                    /*****************************End GUI********************************************/
+                                var [fadeout, blink] = winAnimation(frameRate)
 
-                    /*****************************Animations********************************************/
+                                scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(check, [blink], 0, 25 * frameRate, false);
+                            }
 
-                    var cutscene = 0
-                    var camera3 = new BABYLON.UniversalCamera("camera3",  new BABYLON.Vector3(0, 0, 0), scene);
-                    var frameRate = 20
-                    var flip = false
+                            // Cutscene 1
 
-                    // win animation
-                    function winCutscene() {
-                        image.alpha = 0
-                        image.isVisible = true
-                        check.alpha = 0
-                        check.isVisible = true
+                            function cutscene1() {
+                                cutscene = 1
+                                activeCamera = 3
+                                scene.activeCamera = camera3
+                                car.physicsImpostor.dispose()
+                                dark_overlay.alpha = 0
+                                dark_overlay.isVisible = true
 
-                        var [fadeout, blink] = winAnimation(frameRate)
+                                var [camera_rotate, camera_position, car_move, fadeout] = cutscene1Animation(frameRate)
 
-                        scene.beginDirectAnimation(image, [fadeout], 0, 25 * frameRate, false);
-                        scene.beginDirectAnimation(check, [blink], 0, 25 * frameRate, false);
-                    }
-                    
-                    /*************Cutscene 1*************/
-                    
-                    function cutscene1() {
+                                scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
+                            }
 
-                        cutscene = 1
-                        activeCamera = 3
-                        // camera3.attachControl(scene, false)
-                        scene.activeCamera = camera3  
-                        car.physicsImpostor.dispose()
-                        image.alpha = 0
-                        image.isVisible = true
-    
-                        var [camera_rotate, camera_position, car_move, fadeout] = cutscene1Animation(frameRate)
-                        
-                        scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
-                        scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
-                        scene.beginDirectAnimation(image, [fadeout], 0, 25 * frameRate, false);
-                    }
-
-                    function cutscene1Logic() {
-                        if (camera3.position.x > -108) {
-                            mf = true
-                        }
-                        if (camera3.position.x === -108 && !flip) {
-                            mf = false
-                            car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
-                            car.physicsImpostor.dispose()
-                            setTimeout(function () {
-                                blinkRight()
-                            }, 300)
-                            flip = true
-                        }
-                        if (camera3.position.x === -120 && flip) {
-                            setTimeout(function () {
-                                blinkRight()
-                                car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
-                                rr = true
-                                setTimeout(function () {
-                                    rr = false
-                                }, 100)
-                                setTimeout(function () {
+                            function cutscene1Logic() {
+                                if (camera3.position.x > -108) {
                                     mf = true
+                                }
+                                if (camera3.position.x === -108 && !flip) {
+                                    mf = false
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    car.physicsImpostor.dispose()
                                     setTimeout(function () {
-                                        cutscene = 0
-                                        activeCamera = 2
-                                        changeCamera()
-                                        image.alpha = 0.5
-                                        image.isVisible = false
-                                        mapMeshes.forEach((mesh, index) => {
-                                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
-                                                if (!fail) {
-                                                    lose()
-                                                }
-                                            });
-                                        });
-                                        car.physicsImpostor.registerOnPhysicsCollide(sphere.physicsImpostor, function(main, collided) {
-                                            if (!fail) {
-                                                task2_text.color = "green"
-                                                sphere.physicsImpostor.dispose()
-                                                win()
+                                        blinkRight()
+                                    }, 300)
+                                    flip = true
+                                }
+                                if (camera3.position.x === -120 && flip) {
+                                    setTimeout(function () {
+                                        blinkRight()
+                                        car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                        rr = true
+                                        setTimeout(function () {
+                                            rr = false
+                                        }, 100)
+                                        setTimeout(function () {
+                                            mf = true
+                                            setTimeout(function () {
+                                                cutscene = 0
+                                                activeCamera = 2
+                                                changeCamera()
+                                                dark_overlay.alpha = 0.5
+                                                dark_overlay.isVisible = false
+                                                mapMeshes.forEach((mesh, index) => {
+                                                    car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                                        if (!fail && !success) {
+                                                            lose()
+                                                        }
+                                                    });
+                                                });
+                                                restart()
+                                            }, 3000)
+                                        }, 1000)
+                                    }, 800)
+                                    flip = false
+                                }
+                            }
+
+                            // cutscene1()
+
+                            // Cutscene 2
+
+                            function cutscene2() {
+                                cutscene = 2
+                                activeCamera = 3
+                                scene.activeCamera = camera3
+                                
+                                dark_overlay.alpha = 0
+                                dark_overlay.isVisible = true
+                                check.isVisible = false
+
+                                resetCar()
+                                car.physicsImpostor.dispose()
+
+                                trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                trafficLight[2].material.emissiveColor = BABYLON.Color3.Red()
+
+                                var [camera_rotate, camera_position, car_move, fadeout] = cutscene2Animation(frameRate)
+
+                                scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
+                            }
+
+                            function cutscene2Logic() {
+                                if (car.position.z === 70 && !flip) {
+                                    mf = false
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    car.physicsImpostor.dispose()
+                                    flip = true
+                                }
+                                if (car.position.z !== 70)
+                                mf = true
+                                if (camera3.position.z === 47.6) {
+                                    if (camera3.position.x < -124.2) {
+                                        trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                        trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                        trafficLight[1].material.emissiveColor = BABYLON.Color3.Yellow()
+                                    }
+                                    if (camera3.position.x < -125.2) {
+                                        trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                        trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                        trafficLight[0].material.emissiveColor = BABYLON.Color3.Green()
+                                    }
+                                }
+                                if (car.position.z === -20 && flip) {
+                                    cutscene = 0
+                                    activeCamera = 2
+                                    changeCamera()
+                                    dark_overlay.alpha = 0.5
+                                    dark_overlay.isVisible = false
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    mapMeshes.forEach((mesh, index) => {
+                                        car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                            if (!fail && !success) {
+                                                lose()
                                             }
                                         });
-                                        restart()
-                                    },3000) 
-                                }, 1000)
-                            }, 800)
-                            flip = false
-                        }
-                    }
-
-                    cutscene1()
-
-                    /*************End Cutscene 1*************/
-
-                    /*************Cutscene 2*************/
-
-
-                    /********************************************End Animations********************************************/
-
-                    /*****************************Level 1**********************************************/
-
-                    // create goal sphere
-                    var sphere = BABYLON.Mesh.CreateSphere("sphere1", 16, 2, scene);
-                    sphere.position = new BABYLON.Vector3(-145, 2, 46);
-
-                    // create pbr material for sphere
-                    var pbr = new BABYLON.PBRMetallicRoughnessMaterial("pbr", scene);
-                    sphere.material = pbr;
-                    pbr.baseColor = new BABYLON.Color3(1.0, 0.766, 0.336);
-                    pbr.metallic = 1.0;
-                    pbr.roughness = 0.0;
-                    pbr.environmentTexture = BABYLON.CubeTexture.CreateFromPrefilteredData("/assets/environment.dds", scene);
-                    
-                    // add physics to sphere for collision detection
-                    sphere.physicsImpostor = new BABYLON.PhysicsImpostor(sphere, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
-
-                    // attach goal gui to sphere
-                    rect1.linkWithMesh(sphere);   
-                    line.linkWithMesh(sphere);   
-                    target.linkWithMesh(sphere);   
-
-                    function level1() {
-                        if (car.position.x < -90 && !task_text.color !== "green") {
-                            lose()
-                        }
-                        else if (right_indicator_turned_on) {
-                            task_text.color = "green"
-                            if (fail) {
-                                task_text.color = "white"
-                                blinkRight()
-                            }
-                        }
-                    }
-
-                    /*****************************End Level 1**********************************************/
-
-                    /*****************************Input********************************************/
-
-                    var mf = false; // move forward
-                    var mb = false; // move backward
-                    var rl = false; // rotate left
-                    var rr = false; // rotate right
-                    var brake = false
-
-                    var left_indicator_turned_on = false;
-                    var left_indicator;
-                    var right_indicator_turned_on = false;
-                    var right_indicator;
-
-                    var activeCamera = 1
-                    var blinker_state = 0 // blinker state is on or off
-
-                    function blink(num) { // called for blinking car light
-                        // reset material to prevent light getting stuck when stopping
-                        carLights.forEach((array, index) => {
-                            array.forEach((mesh, index) => {
-                                mesh.material = carLightStartMaterial
-                            })
-                        })
-                        if (blinker_state == 0) {
-                            carLights[num].forEach((mesh, index) => {
-                                mesh.material = new BABYLON.StandardMaterial('', scene)
-                                mesh.material.diffuseColor = BABYLON.Color3.Yellow()
-                                mesh.material.emissiveColor = BABYLON.Color3.Yellow()
-                            })
-                            blinker_state++
-                        }
-                        else {
-                            carLights[num].forEach((mesh, index) => {
-                                mesh.material = carLightStartMaterial
-                            })
-                            blinker_state = 0
-                        }
-                    }
-
-                    function blinkLeft() {
-                        right_indicator_turned_on = false
-                        clearInterval(right_indicator)
-                        if (!left_indicator_turned_on)
-                            left_indicator = setInterval( function() { blink(0); }, 500 );
-                        else {
-                            clearInterval(left_indicator)
-                            carLights.forEach((array, index) => {
-                                array.forEach((mesh, index) => {
-                                    mesh.material = carLightStartMaterial
-                                })
-                            })
-                        }
-                        left_indicator_turned_on = !left_indicator_turned_on
-                    }
-
-                    function blinkRight() {
-                        left_indicator_turned_on = false
-                        clearInterval(left_indicator)
-                        if (!right_indicator_turned_on)
-                            right_indicator = setInterval( function() { blink(1); }, 500 );
-                        else {
-                            clearInterval(right_indicator)
-                            carLights.forEach((array, index) => {
-                                array.forEach((mesh, index) => {
-                                    mesh.material = carLightStartMaterial
-                                })
-                            })
-                        }
-                        right_indicator_turned_on = !right_indicator_turned_on
-                    }
-
-                    function changeCamera() {
-                        if(activeCamera === 1) {
-                            activeCamera = 2;
-                            camera.detachControl(canvas);
-                        }
-                        else if(activeCamera === 2) {
-                            activeCamera = 1;
-                            camera2.detachControl(canvas);
-                        }
-                        scene.activeCamera = activeCamera === 1 ? camera : camera2;
-                        activeCamera === 1 && camera.attachControl(canvas, false)
-                    }
-                    
-                    window.addEventListener('keydown',function (e) {
-                        if (!fail) {
-                            switch (e.keyCode) {
-                                case 87://w
-                                    mf = true;
-                                    break;
-                                case 83://s
-                                    mb = true;
-                                    break;
-                                case 65://a
-                                    rl = true;
-                                    break;
-                                case 68://d
-                                    rr = true;
-                                    break;
-                                case 32://space
-                                    brake = true
-                                    var mat = new BABYLON.StandardMaterial('', scene)
-                                    mat.diffuseColor = BABYLON.Color3.Red()
-                                    mat.emissiveColor = BABYLON.Color3.Red()
-                                    carLights[1][0].material = carLights[0][0].material = mat
-                                    break;
-                                case 82://r
+                                    });
                                     restart()
-                                    break;
-                                case 81://q
-                                    blinkLeft()
-                                    break;
-                                case 69://e
-                                    blinkRight()
-                                    break;
-                                case 86://v
-                                    changeCamera()
-                                    break;
+                                    flip = false
+                                }
                             }
-                        }
-                    });
 
-                    window.addEventListener('keyup',function (e) {
-                        if (!fail) {
-                            switch (e.keyCode) {
-                                case 87://w
-                                    mf = false;
-                                    break;
-                                case 83://s
-                                    mb = false;
-                                    break;
-                                case 65://a
-                                    rl = false;
-                                    break;
-                                case 68://d
-                                    rr = false;
-                                    break;
-                                case 32://space
-                                    brake = false
-                                    carLights[1][0].material = carLights[0][0].material = carLightStartMaterial
-                                    break;
-                                case 82://r
-                                    break;
-                                case 81://q
-                                    break;
-                                case 69://e
-                                    break;
-                                case 86://v
-                                    break;
+                            /********************************************End Animations********************************************/
+
+                            /********************************************Gameplay********************************************/
+
+                            var fail = false
+                            var success = false
+                            var level = 1
+                            var stopCarPhysicsTimeout;
+
+                            function stopCarPhysics() {
+                                mf = false;
+                                mb = false;
+                                rl = false;
+                                rr = false;
+                                car.physicsImpostor.setLinearVelocity(
+                                    new BABYLON.Vector3.Zero()
+                                );
+                                car.physicsImpostor.setAngularVelocity(
+                                    new BABYLON.Vector3.Zero()
+                                );
                             }
-                        }
-                    });
 
-                    /*****************************End Input********************************************/
+                            function resetCar() {
 
-                    var fail = false
-                    var level = 1
-                    var stopCarPhysicsTimeout;
+                                // reset car physics
+                                stopCarPhysics()
 
-                    function stopCarPhysics() {
-                        mf = false;
-                        mb = false;
-                        rl = false;
-                        rr = false;
-                        car.physicsImpostor.setLinearVelocity(
-                            new BABYLON.Vector3(0, 0, 0)
-                        );
-                        car.physicsImpostor.setAngularVelocity(
-                            new BABYLON.Vector3(0, 0, 0)
-                        );
-                    }
-
-                    function restart() {
-                        stopCarPhysics()
-
-                        // reset car position and rotation
-                        car.position = new BABYLON.Vector3.Zero()
-                        car.rotationQuaternion = carStartRotation.clone();
-                        carWheels[0].rotation.y = 0
-                        carWheels[1].rotation.y = Math.PI
-
-                        // reset camera
-                        camera.alpha = cameraStartAlpha;
-                        camera.beta = cameraStartBeta;
-                        camera.radius = cameraStartRadius
-                        camera.attachControl(canvas, true)
-                        camera.parent = car
-
-                        fail = false
-                    }
-
-                    function win() { // called when player succesfully achieved the objective
-                        winCutscene()
-                        setTimeout(function () {
-                            switch (level) {
-                                case 1:
-                                    
-                                    break
-                            }
-                        }, 1000)
-                    }
-
-                    function lose() { // called when player failed to achieve the objective
-                        // show lose screen
-                        image.isVisible = true
-                        text1.isVisible = true
-                        button.isVisible = true
-                        
-                        camera.detachControl(canvas)
-                        camera.parent = null
-                        stopCarPhysicsTimeout = setTimeout(stopCarPhysics, 1000)
-                        fail = true
-                    }
-
-                    function update() { // function for codes that needs constant loop
-
-                        // console.log(car.position)
-
-                        // input, add thrust to car physics
-                        if (mf == true) {
-                            translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
-                            if (carWheels[0].rotation.y < -0.05)
-                                rotate(car, new BABYLON.Vector3(0, -1, 0), -carWheels[0].rotation.y/4);
-                            if (carWheels[0].rotation.y > 0.05)
-                                rotate(car, new BABYLON.Vector3(0, 1, 0), carWheels[0].rotation.y/4);
-                        }
-                        if (mb == true) {
-                            translate(car, new BABYLON.Vector3(1, 0, 0), 1);
-                            if (carWheels[0].rotation.y < -0.05)
-                                rotate(car, new BABYLON.Vector3(0, 1, 0), -carWheels[0].rotation.y/4);
-                            if (carWheels[0].rotation.y > 0.05)
-                                rotate(car, new BABYLON.Vector3(0, -1, 0), carWheels[0].rotation.y/4);
-                        }
-                        if (rl == true) {
-                            if (carWheels[0].rotation.y < -0.5) {
-                            }
-                            else {
-                                carWheels[0].rotation.y += -0.05
-                                carWheels[1].rotation.y += -0.05
-                                carSteeringWheel.rotation.x += -0.05
-                            }
-                        }
-                        if (rr == true) {
-                            if (carWheels[0].rotation.y > 0.5) {
-                            }
-                            else {
-                                carWheels[0].rotation.y += 0.05
-                                carWheels[1].rotation.y += 0.05
-                                carSteeringWheel.rotation.x += 0.05
-                            }
-                        }
-                        if (brake == true) {
-                            if (car.physicsImpostor.getLinearVelocity().x < 0) 
-                                translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
-                            if (car.physicsImpostor.getLinearVelocity().x > 0) 
-                                translate(car, new BABYLON.Vector3(1, 0, 0), -1);
-                            if (car.physicsImpostor.getLinearVelocity().x === 0) {}
-                        }
-
-                        // car wheel rotation physics
-                        if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
-                            carWheels.forEach((mesh, index) => {
-                                if (index%2)
-                                mesh.rotation.z += car.physicsImpostor.getLinearVelocity().x/16
-                                else 
-                                mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().x/16
-                            })
-                        }
-
-                        // cutscene
-                        switch (cutscene) {
-                            case 0:
-                                // level
                                 switch (level) {
                                     case 1:
-                                        level1()
+                                        car.position = new BABYLON.Vector3.Zero()
+                                        car.rotationQuaternion = carStartRotation.clone();
+                                        break
+                                    case 2:
+                                        car.position = new BABYLON.Vector3(-140, 0, 120)
+                                        car.rotationQuaternion = carStartRotation.clone();
+                                        car.rotate(BABYLON.Axis.Y, -(Math.PI/2))
                                         break
                                 }
-                            case 1:
-                                cutscene1Logic()
-                                break
-                        }
-                    }
+                                carWheels[0].rotation.y = 0
+                                carWheels[1].rotation.y = Math.PI
+                                carSteeringWheel.rotation.x = -0.15
+                                if (right_indicator_turned_on)
+                                blinkRight()
+                                if (left_indicator_turned_on)
+                                blinkLeft()
+                            }
 
-                    scene.registerBeforeRender(function () {
-                        update();
-                    })
+                            function restart() {
 
-                    return scene;
-                }
+                                // reset car to default state
+                                resetCar()
 
-                var scene = createScene();
+                                // reset camera
+                                camera.alpha = cameraStartAlpha;
+                                camera.beta = cameraStartBeta;
+                                camera.radius = cameraStartRadius
+                                camera.attachControl(canvas, true)
+                                camera.parent = car
 
-                // Wait for textures and shaders to be ready
-                scene.executeWhenReady(function () {
-                    engine.hideLoadingUI();
+                                if (level == 2) {
+                                    greenLight = false
+                                    task_text.color = "white"
+                                    trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                    trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                    trafficLight[2].material.emissiveColor = BABYLON.Color3.Red()
+                                    trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                    trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                    trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                    trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                    window.clearTimeout(trafficLightTimeout)
+                                    trafficLightTimeout = setTimeout(function () {
+                                        trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                        trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                        trafficLight[1].material.emissiveColor = BABYLON.Color3.Yellow()
+                                        trafficLightTimeout = setTimeout(function () {
+                                            trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                            trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                            trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                            trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                            trafficLight[0].material.emissiveColor = BABYLON.Color3.Green()
+                                            greenLight = true
+                                            task_text.color = "green"
+                                        }, 1000)
+                                    }, 6000)
+                                }
 
-                    // Once the scene is loaded, just register a render loop to render it
-                    engine.runRenderLoop(function () {
-                        scene.render();
-                    });
+                                fail = false
+                            }
 
-                    // Resize canvas if window is resized
-                    window.addEventListener("resize", () => {
-                        engine.resize()
-                    })
-                });
+                            // called when player completed all the objectives
+                            function win() { 
+                                success = true
+                                winCutscene()
+                                setTimeout(function () {
+                                    success = false
+                                    goal.dispose()
+                                    switch (level) {
+                                        case 1:
+                                            level = 2
+                                            goal = createGoal(new BABYLON.Vector3(-140, 2, -46))
+                                            task_text.text = "Wait for the green light";
+                                            task_text.color = "white";
+                                            task2_text.color = "white";
+                                            cutscene2()
+                                            break
+                                        case 2:
+                                            break
+                                    }
+                                }, 1500)
+                            }
+
+                            // called when player failed to complete the objectives
+                            function lose() { 
+                                // show lose screen
+                                dark_overlay.isVisible = true
+                                text1.isVisible = true
+                                button.isVisible = true
+
+                                camera.detachControl(canvas)
+                                camera.parent = null
+                                stopCarPhysicsTimeout = setTimeout(stopCarPhysics, 1000)
+                                fail = true
+                            }
+
+                            function createGoal(position) {
+                                // create goal
+                                var goal = BABYLON.MeshBuilder.CreateCylinder("goal", { height: 20, diameter: 8 });
+                                goal.position = position;
+
+                                // create material for goal
+                                var mat = new BABYLON.StandardMaterial()
+                                goal.material = mat
+                                goal.material.diffuseColor = BABYLON.Color3.Yellow()
+                                // goal.material.emissiveColor = BABYLON.Color3.Yellow()
+                                goal.material.alpha = 0.7
+
+                                // attach goal gui to goal
+                                rect1.linkWithMesh(goal);
+                                line.linkWithMesh(goal);
+                                target.linkWithMesh(goal);
+
+                                return goal
+                            }
+
+                            /*****************************Level 1**********************************************/
+
+                            // create goal
+                            var goal = createGoal(new BABYLON.Vector3(-144, 2, 46))
+
+                            function level1(right_indicator_turned_on) {
+                                if (car.position.z > 40) {
+                                    if (!fail && !success) {
+                                        task2_text.color = "green"
+                                        win()
+                                    }
+                                }
+                                if (car.position.z < -30) {
+                                    task_text.color = "white"
+                                    lose()
+                                }
+                                if (car.position.x < -90 && task_text.color !== "green") {
+                                    lose()
+                                }
+                                else if (right_indicator_turned_on) {
+                                    task_text.color = "green"
+                                    if (fail) {
+                                        task_text.color = "white"
+                                    }
+                                }
+                            }
+
+                            /*****************************End Level 1**********************************************/
+
+                            /*****************************Level 2**********************************************/
+
+                            var trafficLightTimeout;
+                            var greenLight = false
+
+                            function level2() {
+                                if (car.position.z < -20) {
+                                    if (!fail && !success) {
+                                        task2_text.color = "green"
+                                        win()
+                                    }
+                                }
+                                if (car.position.z < 60 && !greenLight) {
+                                    lose()
+                                }
+                            }
+
+                            /*****************************End Level 2**********************************************/
+
+                            /********************************************End Gameplay********************************************/
+
+                            /*****************************Input********************************************/
+
+                            var mf = false; // move forward
+                            var mb = false; // move backward
+                            var rl = false; // rotate left
+                            var rr = false; // rotate right
+                            var brake = false
+
+                            var activeCamera = 1
+
+                            function changeCamera() {
+                                if (activeCamera === 1) {
+                                    activeCamera = 2;
+                                    camera.detachControl(canvas);
+                                }
+                                else if (activeCamera === 2) {
+                                    activeCamera = 1;
+                                    camera2.detachControl(canvas);
+                                }
+                                scene.activeCamera = activeCamera === 1 ? camera : camera2;
+                                activeCamera === 1 && camera.attachControl(canvas, false)
+                            }
+
+                            window.addEventListener('keydown', function (e) {
+                                if (cutscene < 1 && !fail && !success) {
+                                    switch (e.keyCode) {
+                                        case 87://w
+                                            mf = true;
+                                            break;
+                                        case 83://s
+                                            mb = true;
+                                            break;
+                                        case 65://a
+                                            rl = true;
+                                            break;
+                                        case 68://d
+                                            rr = true;
+                                            break;
+                                        case 32://space
+                                            brake = true
+                                            var mat = new BABYLON.StandardMaterial('', scene)
+                                            mat.diffuseColor = BABYLON.Color3.Red()
+                                            mat.emissiveColor = BABYLON.Color3.Red()
+                                            carLights[1][0].material = carLights[0][0].material = mat
+                                            break;
+                                        case 82://r
+                                            restart()
+                                            break;
+                                        case 81://q
+                                            blinkLeft()
+                                            break;
+                                        case 69://e
+                                            blinkRight()
+                                            break;
+                                        case 86://v
+                                            changeCamera()
+                                            break;
+                                    }
+                                }
+                            });
+
+                            window.addEventListener('keyup', function (e) {
+                                if (cutscene < 1 && !fail && !success) {
+                                    switch (e.keyCode) {
+                                        case 87://w
+                                            mf = false;
+                                            break;
+                                        case 83://s
+                                            mb = false;
+                                            break;
+                                        case 65://a
+                                            rl = false;
+                                            break;
+                                        case 68://d
+                                            rr = false;
+                                            break;
+                                        case 32://space
+                                            brake = false
+                                            carLights[1][0].material = carLights[0][0].material = carLightStartMaterial
+                                            break;
+                                        case 82://r
+                                            break;
+                                        case 81://q
+                                            break;
+                                        case 69://e
+                                            break;
+                                        case 86://v
+                                            break;
+                                    }
+                                }
+                            });
+
+                            /*****************************End Input********************************************/
+
+                            function update() { // function for codes that needs constant loop
+
+                                // console.log(car.position)
+                                // console.log("pos" + camera3.position)
+                                // console.log("rot" + camera3.rotation)
+                                // console.log(car.physicsImpostor.getLinearVelocity())
+
+                                // input
+                                // add thrust to car physics
+                                if (mf == true) {
+                                    translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
+                                    // if (car.physicsImpostor.getLinearVelocity().x < -maxSpeed) {}
+                                    // else car.physicsImpostor.applyImpulse(new BABYLON.Vector3(-1, 0, 0).scale(1), car.getAbsolutePosition().add(BABYLON.Vector3.Zero()));
+
+                                    if (carWheels[0].rotation.y < -0.05)
+                                        rotate(car, new BABYLON.Vector3(0, -1, 0), -carWheels[0].rotation.y / 4);
+                                    // car.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 1).scale(0.1), car.getAbsolutePosition());
+                                    if (carWheels[0].rotation.y > 0.05)
+                                        rotate(car, new BABYLON.Vector3(0, 1, 0), carWheels[0].rotation.y / 4);
+                                    // car.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, -1).scale(1), car.getAbsolutePosition());
+                                }
+                                if (mb == true) {
+                                    translate(car, new BABYLON.Vector3(1, 0, 0), 1);
+                                    if (carWheels[0].rotation.y < -0.05)
+                                        rotate(car, new BABYLON.Vector3(0, 1, 0), -carWheels[0].rotation.y / 4);
+                                    if (carWheels[0].rotation.y > 0.05)
+                                        rotate(car, new BABYLON.Vector3(0, -1, 0), carWheels[0].rotation.y / 4);
+                                }
+                                if (rl == true) {
+                                    if (carWheels[0].rotation.y < -0.5) {
+                                    }
+                                    else {
+                                        carWheels[0].rotation.y += -0.05
+                                        carWheels[1].rotation.y += -0.05
+                                        carSteeringWheel.rotation.x += -0.05
+                                    }
+                                }
+                                if (rr == true) {
+                                    if (carWheels[0].rotation.y > 0.5) {
+                                    }
+                                    else {
+                                        carWheels[0].rotation.y += 0.05
+                                        carWheels[1].rotation.y += 0.05
+                                        carSteeringWheel.rotation.x += 0.05
+                                    }
+                                }
+                                if (brake == true) {
+                                    if (car.physicsImpostor.getLinearVelocity().x < -0.5)
+                                        translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
+                                    else if (car.physicsImpostor.getLinearVelocity().x > 0.5)
+                                        translate(car, new BABYLON.Vector3(1, 0, 0), -1);
+                                    else {
+                                        car.physicsImpostor.setLinearVelocity(
+                                            new BABYLON.Vector3.Zero()
+                                        );
+                                    }
+                                }
+
+                                // car wheel rotation physics
+                                if (car.physicsImpostor.getLinearVelocity().x < -0.1 || car.physicsImpostor.getLinearVelocity().x > 0.1) {
+                                    carWheels.forEach((mesh, index) => {
+                                        if (index % 2)
+                                            mesh.rotation.z += car.physicsImpostor.getLinearVelocity().x / 16
+                                        else
+                                            mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().x / 16
+                                    })
+                                }
+
+                                // cutscene
+                                switch (cutscene) {
+                                    case 0:
+                                        // level
+                                        switch (level) {
+                                            case 1:
+                                                level1(right_indicator_turned_on)
+                                                break
+                                            case 2:
+                                                level2()
+                                                break
+                                        }
+                                    case 1:
+                                        cutscene1Logic()
+                                        break
+                                    case 2:
+                                        cutscene2Logic()
+                                        break
+                                }
+                            }
+
+                            // show inspector
+                            // scene.debugLayer.show({embedMode: true});
+                            
+                            // display loading screen while loading assets
+                            engine.displayLoadingUI();
+
+                            scene.registerBeforeRender(function () {
+                                update();
+                            })
+
+                            return scene;
+        }
+
+        var scene = createScene();
+
+        // Wait for textures and shaders to be ready
+        scene.executeWhenReady(function () {
+            engine.hideLoadingUI();
+
+            // Once the scene is loaded, just register a render loop to render it
+            engine.runRenderLoop(function () {
+                scene.render();
             });
 
-        </script>
-    </body>
+            // Resize canvas if window is resized
+            window.addEventListener("resize", () => {
+                engine.resize()
+            })
+        });
+
+        // var nodeMaterial = new BABYLON.NodeMaterial("nodeMat", scene, {
+            //     emitComments: true
+            // });
+            // nodeMaterial.loadAsync("https://gist.githubusercontent.com/dannybucksch/8c1e194a526b8420039481dceb77995d/raw/e75f2d3bbda4ea2528d2995c613bec50595cdf4e/mouse_sine.json").then(() => {
+            //     nodeMaterial.build(true);
+            //     nodeMaterial.needDepthPrePass = true;
+            //     nodeMaterial.backFaceCulling = false;
+
+            //     goal.material = nodeMaterial;
+            // })
+    </script>
+</body>
+
 </html>

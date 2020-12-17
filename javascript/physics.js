@@ -31,7 +31,9 @@ var rotate = function(mesh, direction, power) {
 
 var translate = function(mesh, direction, power) {
     // console.log("linear x: " + mesh.physicsImpostor.getLinearVelocity().x);
+    // console.log("linear y: " + mesh.physicsImpostor.getLinearVelocity().y);
     // console.log("linear z: " + mesh.physicsImpostor.getLinearVelocity().z);
+    // console.log(mesh.physicsImpostor.getLinearVelocity())
     var maxSpeed = 20;
 
     // limit forward velocity speed
@@ -56,6 +58,14 @@ var translate = function(mesh, direction, power) {
     //     mesh.physicsImpostor.setLinearVelocity(
     //         new BABYLON.Vector3( mesh.physicsImpostor.getLinearVelocity().x, mesh.physicsImpostor.getLinearVelocity().y, 1)
     //     );
+
+    // if (Math.abs(mesh.physicsImpostor.getLinearVelocity().z) > 1) {
+    //     power = 0.5
+        // if (Math.abs(mesh.physicsImpostor.getLinearVelocity().x) < 0.1)
+        // mesh.physicsImpostor.setLinearVelocity(
+        //     new BABYLON.Vector3( mesh.physicsImpostor.getLinearVelocity().x, mesh.physicsImpostor.getLinearVelocity().y, 0)
+        // );
+    // }
 
     mesh.physicsImpostor.setLinearVelocity(
         mesh.physicsImpostor.getLinearVelocity().add(
