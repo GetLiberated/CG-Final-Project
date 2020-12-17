@@ -355,7 +355,7 @@
                                 fail = false
                             }
 
-                            // called when player succesfully achieved the objective
+                            // called when player completed all the objectives
                             function win() { 
                                 success = true
                                 winCutscene()
@@ -369,7 +369,7 @@
                                 }, 1000)
                             }
 
-                            // called when player failed to achieve the objective
+                            // called when player failed to complete the objectives
                             function lose() { 
                                 // show lose screen
                                 dark_overlay.isVisible = true
@@ -562,11 +562,11 @@
                                     }
                                 }
                                 if (brake == true) {
-                                    if (car.physicsImpostor.getLinearVelocity().x < 0)
+                                    if (car.physicsImpostor.getLinearVelocity().x < -0.5)
                                         translate(car, new BABYLON.Vector3(-1, 0, 0), -1);
-                                    if (car.physicsImpostor.getLinearVelocity().x > 0)
+                                    else if (car.physicsImpostor.getLinearVelocity().x > 0.5)
                                         translate(car, new BABYLON.Vector3(1, 0, 0), -1);
-                                    if (car.physicsImpostor.getLinearVelocity().x === 0) {
+                                    else {
                                         car.physicsImpostor.setLinearVelocity(
                                             new BABYLON.Vector3.Zero()
                                         );
