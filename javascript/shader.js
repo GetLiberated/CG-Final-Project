@@ -1,4 +1,433 @@
-function createShader() {
+function dissolveShader() {
+    var nodeMaterial = new BABYLON.NodeMaterial("node");
+
+    // InputBlock
+    var position = new BABYLON.InputBlock("position");
+    position.setAsAttribute("position");
+
+    // TransformBlock
+    var worldPos = new BABYLON.TransformBlock("worldPos");
+    worldPos.complementZ = 0;
+    worldPos.complementW = 1;
+
+    // InputBlock
+    var world = new BABYLON.InputBlock("world");
+    world.setAsSystemValue(BABYLON.NodeMaterialSystemValues.World);
+
+    // TransformBlock
+    var Worldnormal = new BABYLON.TransformBlock("World normal");
+    Worldnormal.complementZ = 0;
+    Worldnormal.complementW = 0;
+
+    // InputBlock
+    var normal = new BABYLON.InputBlock("normal");
+    normal.setAsAttribute("normal");
+
+    // PerturbNormalBlock
+    var Perturbnormal = new BABYLON.PerturbNormalBlock("Perturb normal");
+    Perturbnormal.invertX = true;
+    Perturbnormal.invertY = true;
+
+    // InputBlock
+    var uv = new BABYLON.InputBlock("uv");
+    uv.setAsAttribute("uv");
+
+    // TextureBlock
+    var NormalTexture = new BABYLON.TextureBlock("NormalTexture");
+    NormalTexture.texture = new BABYLON.Texture("https://raw.githubusercontent.com/PatrickRyanMS/BabylonJStextures/master/Demos/moon/assets/MoonMat_normal.png", null);
+    NormalTexture.texture.wrapU = 1;
+    NormalTexture.texture.wrapV = 1;
+    NormalTexture.texture.uAng = 0;
+    NormalTexture.texture.vAng = 0;
+    NormalTexture.texture.wAng = 0;
+    NormalTexture.texture.uOffset = 0;
+    NormalTexture.texture.vOffset = 0;
+    NormalTexture.texture.uScale = 1;
+    NormalTexture.texture.vScale = 1;
+    NormalTexture.convertToGammaSpace = undefined;
+    NormalTexture.convertToLinearSpace = false;
+
+    // InputBlock
+    var uv1 = new BABYLON.InputBlock("uv");
+    uv1.setAsAttribute("uv");
+
+    // TextureBlock
+    var SpecularTexture = new BABYLON.TextureBlock("SpecularTexture");
+    SpecularTexture.texture = new BABYLON.Texture("https://raw.githubusercontent.com/PatrickRyanMS/BabylonJStextures/master/Demos/moon/assets/moonMat_specular.png", null);
+    SpecularTexture.texture.wrapU = 1;
+    SpecularTexture.texture.wrapV = 1;
+    SpecularTexture.texture.uAng = 0;
+    SpecularTexture.texture.vAng = 0;
+    SpecularTexture.texture.wAng = 0;
+    SpecularTexture.texture.uOffset = 0;
+    SpecularTexture.texture.vOffset = 0;
+    SpecularTexture.texture.uScale = 1;
+    SpecularTexture.texture.vScale = 1;
+    SpecularTexture.convertToGammaSpace = undefined;
+    SpecularTexture.convertToLinearSpace = false;
+
+    // MultiplyBlock
+    var Multiply = new BABYLON.MultiplyBlock("Multiply");
+    Multiply.visibleInInspector = false;
+    Multiply.visibleOnFrame = false;
+
+    // InputBlock
+    var SpecularColor = new BABYLON.InputBlock("SpecularColor");
+    SpecularColor.value = new BABYLON.Color3(1, 1, 1);
+    SpecularColor.isConstant = false;
+
+    // LightBlock
+    var Lights = new BABYLON.LightBlock("Lights");
+    Lights.visibleInInspector = false;
+    Lights.visibleOnFrame = false;
+
+    // InputBlock
+    var cameraPosition = new BABYLON.InputBlock("cameraPosition");
+    cameraPosition.setAsSystemValue(BABYLON.NodeMaterialSystemValues.CameraPosition);
+
+    // PowBlock
+    var Pow = new BABYLON.PowBlock("Pow");
+    Pow.visibleInInspector = false;
+    Pow.visibleOnFrame = false;
+
+    // InputBlock
+    var SpecularPower = new BABYLON.InputBlock("SpecularPower");
+    SpecularPower.value = 4;
+    SpecularPower.min = 0;
+    SpecularPower.max = 0;
+    SpecularPower.isBoolean = false;
+    SpecularPower.matrixMode = 0;
+    SpecularPower.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    SpecularPower.isConstant = false;
+
+    // InputBlock
+    var GlossPower = new BABYLON.InputBlock("GlossPower");
+    GlossPower.value = 512;
+    GlossPower.min = 0;
+    GlossPower.max = 1024;
+    GlossPower.isBoolean = false;
+    GlossPower.matrixMode = 0;
+    GlossPower.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    GlossPower.isConstant = true;
+
+    // MultiplyBlock
+    var Multiply1 = new BABYLON.MultiplyBlock("Multiply");
+    Multiply1.visibleInInspector = false;
+    Multiply1.visibleOnFrame = false;
+
+    // TextureBlock
+    var AlbedoTexture = new BABYLON.TextureBlock("AlbedoTexture");
+    AlbedoTexture.texture = new BABYLON.Texture("https://raw.githubusercontent.com/PatrickRyanMS/BabylonJStextures/master/Demos/moon/assets/moonMat_diffuse.png", null);
+    AlbedoTexture.texture.wrapU = 1;
+    AlbedoTexture.texture.wrapV = 1;
+    AlbedoTexture.texture.uAng = 0;
+    AlbedoTexture.texture.vAng = 0;
+    AlbedoTexture.texture.wAng = 0;
+    AlbedoTexture.texture.uOffset = 0;
+    AlbedoTexture.texture.vOffset = 0;
+    AlbedoTexture.texture.uScale = 1;
+    AlbedoTexture.texture.vScale = 1;
+    AlbedoTexture.convertToGammaSpace = undefined;
+    AlbedoTexture.convertToLinearSpace = false;
+
+    // InputBlock
+    var AlbedoColor = new BABYLON.InputBlock("AlbedoColor");
+    AlbedoColor.value = new BABYLON.Color3(1, 1, 1);
+    AlbedoColor.isConstant = false;
+
+    // AddBlock
+    var Add = new BABYLON.AddBlock("Add");
+    Add.visibleInInspector = false;
+    Add.visibleOnFrame = false;
+
+    // ColorMergerBlock
+    var ColorMerger = new BABYLON.ColorMergerBlock("ColorMerger");
+    ColorMerger.visibleInInspector = false;
+    ColorMerger.visibleOnFrame = false;
+
+    // AddBlock
+    var Add1 = new BABYLON.AddBlock("Add");
+    Add1.visibleInInspector = false;
+    Add1.visibleOnFrame = false;
+
+    // ScaleBlock
+    var Scale = new BABYLON.ScaleBlock("Scale");
+    Scale.visibleInInspector = false;
+    Scale.visibleOnFrame = false;
+
+    // MultiplyBlock
+    var Multiply2 = new BABYLON.MultiplyBlock("Multiply");
+    Multiply2.visibleInInspector = false;
+    Multiply2.visibleOnFrame = false;
+
+    // VectorMergerBlock
+    var VectorMerger = new BABYLON.VectorMergerBlock("VectorMerger");
+    VectorMerger.visibleInInspector = false;
+    VectorMerger.visibleOnFrame = false;
+
+    // OneMinusBlock
+    var Oneminus = new BABYLON.OneMinusBlock("One minus");
+    Oneminus.visibleInInspector = false;
+    Oneminus.visibleOnFrame = false;
+
+    // SmoothStepBlock
+    var Smoothstep = new BABYLON.SmoothStepBlock("Smooth step");
+    Smoothstep.visibleInInspector = false;
+    Smoothstep.visibleOnFrame = false;
+
+    // AddBlock
+    var Add2 = new BABYLON.AddBlock("Add");
+    Add2.visibleInInspector = false;
+    Add2.visibleOnFrame = false;
+
+    // RemapBlock
+    var Remap = new BABYLON.RemapBlock("Remap");
+    Remap.sourceRange = new BABYLON.Vector2(0, 1);
+    Remap.targetRange = new BABYLON.Vector2(0, -0.2);
+
+    // InputBlock
+    // Defines the size of the highlight when dissolving
+    var EdgeSize = new BABYLON.InputBlock("EdgeSize");
+    EdgeSize.value = 0.25;
+    EdgeSize.min = 0;
+    EdgeSize.max = 1;
+    EdgeSize.isBoolean = false;
+    EdgeSize.matrixMode = 0;
+    EdgeSize.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    EdgeSize.isConstant = false;
+
+    // InputBlock
+    // The position of the dissolve relative to Y axis of the object.
+    var EdgePosition = new BABYLON.InputBlock("EdgePosition");
+    EdgePosition.value = 2;
+    EdgePosition.min = -1.5;
+    EdgePosition.max = 2;
+    EdgePosition.isBoolean = false;
+    EdgePosition.matrixMode = 0;
+    EdgePosition.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    EdgePosition.isConstant = false;
+
+    // StepBlock
+    var Step = new BABYLON.StepBlock("Step");
+    Step.visibleInInspector = false;
+    Step.visibleOnFrame = false;
+
+    // VectorSplitterBlock
+    var VectorSplitter = new BABYLON.VectorSplitterBlock("VectorSplitter");
+    VectorSplitter.visibleInInspector = false;
+    VectorSplitter.visibleOnFrame = false;
+
+    // InputBlock
+    var position1 = new BABYLON.InputBlock("position");
+    position1.setAsAttribute("position");
+
+    // SmoothStepBlock
+    var Smoothstep1 = new BABYLON.SmoothStepBlock("Smooth step");
+    Smoothstep1.visibleInInspector = false;
+    Smoothstep1.visibleOnFrame = false;
+
+    // AddBlock
+    var Add3 = new BABYLON.AddBlock("Add");
+    Add3.visibleInInspector = false;
+    Add3.visibleOnFrame = false;
+
+    // RemapBlock
+    var Remap1 = new BABYLON.RemapBlock("Remap");
+    Remap1.sourceRange = new BABYLON.Vector2(0, 1);
+    Remap1.targetRange = new BABYLON.Vector2(0, -0.2);
+
+    // InputBlock
+    // Size of smooth step when dissolving object
+    var SmoothEdgeSize = new BABYLON.InputBlock("SmoothEdgeSize");
+    SmoothEdgeSize.value = 0.25;
+    SmoothEdgeSize.min = 0;
+    SmoothEdgeSize.max = 1;
+    SmoothEdgeSize.isBoolean = false;
+    SmoothEdgeSize.matrixMode = 0;
+    SmoothEdgeSize.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    SmoothEdgeSize.isConstant = false;
+
+    // MultiplyBlock
+    var Multiply3 = new BABYLON.MultiplyBlock("Multiply");
+    Multiply3.visibleInInspector = false;
+    Multiply3.visibleOnFrame = false;
+
+    // FragmentOutputBlock
+    var fragmentOutput = new BABYLON.FragmentOutputBlock("fragmentOutput");
+    fragmentOutput.visibleInInspector = false;
+    fragmentOutput.visibleOnFrame = false;
+
+    // MultiplyBlock
+    var Multiply4 = new BABYLON.MultiplyBlock("Multiply");
+    Multiply4.visibleInInspector = false;
+    Multiply4.visibleOnFrame = false;
+
+    // LerpBlock
+    var Lerp = new BABYLON.LerpBlock("Lerp");
+    Lerp.visibleInInspector = false;
+    Lerp.visibleOnFrame = false;
+
+    // StepBlock
+    var Step1 = new BABYLON.StepBlock("Step");
+    Step1.visibleInInspector = false;
+    Step1.visibleOnFrame = false;
+
+    // OneMinusBlock
+    var Oneminus1 = new BABYLON.OneMinusBlock("One minus");
+    Oneminus1.visibleInInspector = false;
+    Oneminus1.visibleOnFrame = false;
+
+    // InputBlock
+    // enable/disable glow effect on object. DO NOT CHANGE MANUALLY
+    var glowMask = new BABYLON.InputBlock("glowMask");
+    glowMask.value = 0;
+    glowMask.min = 0;
+    glowMask.max = 1;
+    glowMask.isBoolean = false;
+    glowMask.matrixMode = 0;
+    glowMask.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    glowMask.isConstant = false;
+
+    // InputBlock
+    var Float = new BABYLON.InputBlock("Float");
+    Float.value = 0.5;
+    Float.min = 0;
+    Float.max = 0;
+    Float.isBoolean = false;
+    Float.matrixMode = 0;
+    Float.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    Float.isConstant = false;
+
+    // VectorSplitterBlock
+    var VectorSplitter1 = new BABYLON.VectorSplitterBlock("VectorSplitter");
+    VectorSplitter1.visibleInInspector = false;
+    VectorSplitter1.visibleOnFrame = false;
+
+    // InputBlock
+    var position2 = new BABYLON.InputBlock("position");
+    position2.setAsAttribute("position");
+
+    // InputBlock
+    var EdgeColor = new BABYLON.InputBlock("EdgeColor");
+    EdgeColor.value = new BABYLON.Color4(0.11372549019607843, 0.6862745098039216, 0.9058823529411765, 1);
+    EdgeColor.isConstant = false;
+
+    // InputBlock
+    // Defines the strength of the emission from the highlight
+    var EdgeHighlightStrength = new BABYLON.InputBlock("EdgeHighlightStrength");
+    EdgeHighlightStrength.value = 1;
+    EdgeHighlightStrength.min = 0;
+    EdgeHighlightStrength.max = 1;
+    EdgeHighlightStrength.isBoolean = false;
+    EdgeHighlightStrength.matrixMode = 0;
+    EdgeHighlightStrength.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    EdgeHighlightStrength.isConstant = false;
+
+    // InputBlock
+    var normalStrength = new BABYLON.InputBlock("normalStrength");
+    normalStrength.value = 1.35;
+    normalStrength.min = 0;
+    normalStrength.max = 5;
+    normalStrength.isBoolean = false;
+    normalStrength.matrixMode = 0;
+    normalStrength.animationType = BABYLON.AnimatedInputBlockTypes.None;
+    normalStrength.isConstant = false;
+
+    // TransformBlock
+    var worldPosviewProjectionTransform = new BABYLON.TransformBlock("worldPos * viewProjectionTransform");
+    worldPosviewProjectionTransform.complementZ = 0;
+    worldPosviewProjectionTransform.complementW = 1;
+
+    // InputBlock
+    var viewProjection = new BABYLON.InputBlock("viewProjection");
+    viewProjection.setAsSystemValue(BABYLON.NodeMaterialSystemValues.ViewProjection);
+
+    // VertexOutputBlock
+    var vertexOutput = new BABYLON.VertexOutputBlock("vertexOutput");
+    vertexOutput.visibleInInspector = false;
+    vertexOutput.visibleOnFrame = false;
+
+    // Connections
+    position.output.connectTo(worldPos.vector);
+    world.output.connectTo(worldPos.transform);
+    worldPos.output.connectTo(worldPosviewProjectionTransform.vector);
+    viewProjection.output.connectTo(worldPosviewProjectionTransform.transform);
+    worldPosviewProjectionTransform.output.connectTo(vertexOutput.vector);
+    worldPos.output.connectTo(Lights.worldPosition);
+    worldPos.output.connectTo(Perturbnormal.worldPosition);
+    normal.output.connectTo(Worldnormal.vector);
+    world.output.connectTo(Worldnormal.transform);
+    Worldnormal.output.connectTo(Perturbnormal.worldNormal);
+    uv.output.connectTo(Perturbnormal.uv);
+    uv1.output.connectTo(NormalTexture.uv);
+    NormalTexture.rgb.connectTo(Perturbnormal.normalMapColor);
+    normalStrength.output.connectTo(Perturbnormal.strength);
+    Perturbnormal.output.connectTo(Lights.worldNormal);
+    cameraPosition.output.connectTo(Lights.cameraPosition);
+    uv1.output.connectTo(SpecularTexture.uv);
+    SpecularTexture.a.connectTo(Pow.value);
+    SpecularPower.output.connectTo(Pow.power);
+    Pow.output.connectTo(Lights.glossiness);
+    GlossPower.output.connectTo(Lights.glossPower);
+    uv1.output.connectTo(AlbedoTexture.uv);
+    AlbedoTexture.rgb.connectTo(Multiply1.left);
+    AlbedoColor.output.connectTo(Multiply1.right);
+    Multiply1.output.connectTo(Lights.diffuseColor);
+    SpecularTexture.rgb.connectTo(Multiply.left);
+    SpecularColor.output.connectTo(Multiply.right);
+    Multiply.output.connectTo(Lights.specularColor);
+    Lights.diffuseOutput.connectTo(Add.left);
+    Lights.specularOutput.connectTo(Add.right);
+    Add.output.connectTo(ColorMerger.rgb );
+    ColorMerger.rgba.connectTo(Add1.left);
+    EdgeSize.output.connectTo(Remap.input);
+    Remap.output.connectTo(Add2.left);
+    EdgePosition.output.connectTo(Add2.right);
+    Add2.output.connectTo(Smoothstep.value);
+    position2.output.connectTo(VectorSplitter1.xyzIn);
+    VectorSplitter1.y.connectTo(Smoothstep.edge0);
+    EdgePosition.output.connectTo(Smoothstep.edge1);
+    Smoothstep.output.connectTo(Oneminus.input);
+    Oneminus.output.connectTo(VectorMerger.x);
+    Oneminus.output.connectTo(VectorMerger.y);
+    Oneminus.output.connectTo(VectorMerger.z);
+    Oneminus.output.connectTo(VectorMerger.w);
+    VectorMerger.xyzw.connectTo(Multiply2.left);
+    EdgeColor.output.connectTo(Multiply2.right);
+    Multiply2.output.connectTo(Scale.input);
+    EdgeHighlightStrength.output.connectTo(Scale.factor);
+    Scale.output.connectTo(Add1.right);
+    Add1.output.connectTo(Multiply4.left);
+    Scale.output.connectTo(Lerp.left);
+    ColorMerger.rgba.connectTo(Lerp.right);
+    glowMask.output.connectTo(Oneminus1.input);
+    Oneminus1.output.connectTo(Step1.value);
+    Float.output.connectTo(Step1.edge);
+    Step1.output.connectTo(Lerp.gradient);
+    Lerp.output.connectTo(Multiply4.right);
+    Multiply4.output.connectTo(fragmentOutput.rgba);
+    EdgePosition.output.connectTo(Step.value);
+    position1.output.connectTo(VectorSplitter.xyzIn);
+    VectorSplitter.y.connectTo(Step.edge);
+    Step.output.connectTo(Multiply3.left);
+    SmoothEdgeSize.output.connectTo(Remap1.input);
+    Remap1.output.connectTo(Add3.left);
+    EdgePosition.output.connectTo(Add3.right);
+    Add3.output.connectTo(Smoothstep1.value);
+    VectorSplitter.y.connectTo(Smoothstep1.edge0);
+    EdgePosition.output.connectTo(Smoothstep1.edge1);
+    Smoothstep1.output.connectTo(Multiply3.right);
+    Multiply3.output.connectTo(fragmentOutput.a);
+
+    // Output nodes
+    nodeMaterial.addOutputNode(vertexOutput);
+    nodeMaterial.addOutputNode(fragmentOutput);
+    nodeMaterial.build();
+
+    return nodeMaterial
+}
+
+function boomShader() {
     var nodeMaterial = new BABYLON.NodeMaterial("node");
 
     // InputBlock
