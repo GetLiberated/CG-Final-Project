@@ -1,6 +1,7 @@
 /*****************************Map********************************************/
 
 var mapMeshes;
+var trafficLight = []
 function createMap(scene, car, fail, lose) {
 
     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Objects Real.obj", scene, (meshes) => {
@@ -12,14 +13,6 @@ function createMap(scene, car, fail, lose) {
             // mesh.showBoundingBox = true;
             mesh.checkCollisions = true
             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
-    
-            // check for collisions
-            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function(main, collided) {
-                if (!fail) {
-                    // console.log(collided.object.name)
-                    lose()
-                }
-            });
         });
     });
     
@@ -34,16 +27,20 @@ function createMap(scene, car, fail, lose) {
         });
     });
     
-    // new BABYLON.SceneLoader.ImportMesh(null, "./assets/traffic light/", "traffic light.obj", scene, (meshes) => {
-    //     meshes.forEach((mesh, index) => {
-    //         mesh.position = new BABYLON.Vector3(-120, 0, -12)
-    //         mesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
-    //         mesh.rotation = new BABYLON.Vector3(0, 0, 0)
-    //         // mesh.showBoundingBox = true;
-    //         mesh.checkCollisions = true
-    //         mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
-    //     });
-    // });
+    new BABYLON.SceneLoader.ImportMesh(null, "./assets/traffic light/", "traffic light.obj", scene, (meshes) => {
+        meshes.forEach((mesh, index) => {
+            mesh.position = new BABYLON.Vector3(-127, 0, 40)
+            mesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
+            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+            // mesh.showBoundingBox = true;
+            mesh.checkCollisions = true
+            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+
+            if (index == 21 || index == 23 || index == 25) {
+                trafficLight.push(mesh)
+            }
+        });
+    });
     
     var boom = BABYLON.Mesh.CreateSphere()
     var shader = boomShader()

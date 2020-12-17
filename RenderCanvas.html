@@ -274,16 +274,10 @@
                                                 dark_overlay.isVisible = false
                                                 mapMeshes.forEach((mesh, index) => {
                                                     car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
-                                                        if (!fail) {
+                                                        if (!fail && !success) {
                                                             lose()
                                                         }
                                                     });
-                                                });
-                                                car.physicsImpostor.registerOnPhysicsCollide(goal.physicsImpostor, function (main, collided) {
-                                                    if (!fail) {
-                                                        task2_text.color = "green"
-                                                        win()
-                                                    }
                                                 });
                                                 restart()
                                             }, 3000)
@@ -293,24 +287,75 @@
                                 }
                             }
 
-                            cutscene1()
+                            // cutscene1()
 
                             // Cutscene 2
 
                             function cutscene2() {
                                 cutscene = 2
                                 activeCamera = 3
-                                camera3.attachControl(scene, false)
                                 scene.activeCamera = camera3
-                                car.physicsImpostor.dispose()
+                                
                                 dark_overlay.alpha = 0
                                 dark_overlay.isVisible = true
+                                check.isVisible = false
 
-                                var [camera_rotate, camera_position, car_move, fadeout] = cutscene1Animation(frameRate)
+                                resetCar()
+                                car.physicsImpostor.dispose()
+
+                                trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                trafficLight[2].material.emissiveColor = BABYLON.Color3.Red()
+
+                                var [camera_rotate, camera_position, car_move, fadeout] = cutscene2Animation(frameRate)
 
                                 scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
                                 scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
                                 scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
+                            }
+
+                            function cutscene2Logic() {
+                                if (car.position.z === 70 && !flip) {
+                                    mf = false
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    car.physicsImpostor.dispose()
+                                    flip = true
+                                }
+                                if (car.position.z !== 70)
+                                mf = true
+                                if (camera3.position.z === 47.6) {
+                                    if (camera3.position.x < -124.2) {
+                                        trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                        trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                        trafficLight[1].material.emissiveColor = BABYLON.Color3.Yellow()
+                                    }
+                                    if (camera3.position.x < -125.2) {
+                                        trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                        trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                        trafficLight[0].material.emissiveColor = BABYLON.Color3.Green()
+                                    }
+                                }
+                                if (car.position.z === -20 && flip) {
+                                    cutscene = 0
+                                    activeCamera = 2
+                                    changeCamera()
+                                    dark_overlay.alpha = 0.5
+                                    dark_overlay.isVisible = false
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    mapMeshes.forEach((mesh, index) => {
+                                        car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                            if (!fail && !success) {
+                                                lose()
+                                            }
+                                        });
+                                    });
+                                    restart()
+                                    flip = false
+                                }
                             }
 
                             /********************************************End Animations********************************************/
@@ -328,19 +373,29 @@
                                 rl = false;
                                 rr = false;
                                 car.physicsImpostor.setLinearVelocity(
-                                    new BABYLON.Vector3(0, 0, 0)
+                                    new BABYLON.Vector3.Zero()
                                 );
                                 car.physicsImpostor.setAngularVelocity(
-                                    new BABYLON.Vector3(0, 0, 0)
+                                    new BABYLON.Vector3.Zero()
                                 );
                             }
 
-                            function restart() {
+                            function resetCar() {
+
+                                // reset car physics
                                 stopCarPhysics()
 
-                                // reset car position and rotation
-                                car.position = new BABYLON.Vector3.Zero()
-                                car.rotationQuaternion = carStartRotation.clone();
+                                switch (level) {
+                                    case 1:
+                                        car.position = new BABYLON.Vector3.Zero()
+                                        car.rotationQuaternion = carStartRotation.clone();
+                                        break
+                                    case 2:
+                                        car.position = new BABYLON.Vector3(-140, 0, 120)
+                                        car.rotationQuaternion = carStartRotation.clone();
+                                        car.rotate(BABYLON.Axis.Y, -(Math.PI/2))
+                                        break
+                                }
                                 carWheels[0].rotation.y = 0
                                 carWheels[1].rotation.y = Math.PI
                                 carSteeringWheel.rotation.x = -0.15
@@ -348,6 +403,12 @@
                                 blinkRight()
                                 if (left_indicator_turned_on)
                                 blinkLeft()
+                            }
+
+                            function restart() {
+
+                                // reset car to default state
+                                resetCar()
 
                                 // reset camera
                                 camera.alpha = cameraStartAlpha;
@@ -355,6 +416,35 @@
                                 camera.radius = cameraStartRadius
                                 camera.attachControl(canvas, true)
                                 camera.parent = car
+
+                                if (level == 2) {
+                                    greenLight = false
+                                    task_text.color = "white"
+                                    trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                    trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                    trafficLight[2].material.emissiveColor = BABYLON.Color3.Red()
+                                    trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                    trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                    trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                    trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                    window.clearTimeout(trafficLightTimeout)
+                                    trafficLightTimeout = setTimeout(function () {
+                                        trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                        trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                        trafficLight[1].material.emissiveColor = BABYLON.Color3.Yellow()
+                                        trafficLightTimeout = setTimeout(function () {
+                                            trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                            trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                            trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                            trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                            trafficLight[0].material.emissiveColor = BABYLON.Color3.Green()
+                                            greenLight = true
+                                            task_text.color = "green"
+                                        }, 1000)
+                                    }, 6000)
+                                }
 
                                 fail = false
                             }
@@ -364,13 +454,21 @@
                                 success = true
                                 winCutscene()
                                 setTimeout(function () {
+                                    success = false
+                                    goal.dispose()
                                     switch (level) {
                                         case 1:
-                                            success = false
+                                            level = 2
+                                            goal = createGoal(new BABYLON.Vector3(-140, 2, -46))
+                                            task_text.text = "Wait for the green light";
+                                            task_text.color = "white";
+                                            task2_text.color = "white";
                                             cutscene2()
-                                        break
+                                            break
+                                        case 2:
+                                            break
                                     }
-                                }, 1000)
+                                }, 1500)
                             }
 
                             // called when player failed to complete the objectives
@@ -386,28 +484,38 @@
                                 fail = true
                             }
 
+                            function createGoal(position) {
+                                // create goal
+                                var goal = BABYLON.MeshBuilder.CreateCylinder("goal", { height: 20, diameter: 8 });
+                                goal.position = position;
+
+                                // create material for goal
+                                var mat = new BABYLON.StandardMaterial()
+                                goal.material = mat
+                                goal.material.diffuseColor = BABYLON.Color3.Yellow()
+                                // goal.material.emissiveColor = BABYLON.Color3.Yellow()
+                                goal.material.alpha = 0.7
+
+                                // attach goal gui to goal
+                                rect1.linkWithMesh(goal);
+                                line.linkWithMesh(goal);
+                                target.linkWithMesh(goal);
+
+                                return goal
+                            }
+
                             /*****************************Level 1**********************************************/
 
                             // create goal
-                            var goal = BABYLON.MeshBuilder.CreateCylinder("goal", { height: 20, diameter: 8 });
-                            goal.position = new BABYLON.Vector3(-144, 2, 46);
-
-                            // create material for goal
-                            var mat = new BABYLON.StandardMaterial()
-                            goal.material = mat
-                            goal.material.diffuseColor = BABYLON.Color3.Yellow()
-                            // goal.material.emissiveColor = BABYLON.Color3.Yellow()
-                            goal.material.alpha = 0.7
-
-                            // add physics to goal for collision detection
-                            goal.physicsImpostor = new BABYLON.PhysicsImpostor(goal, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0 }, scene);
-
-                            // attach goal gui to goal
-                            rect1.linkWithMesh(goal);
-                            line.linkWithMesh(goal);
-                            target.linkWithMesh(goal);
+                            var goal = createGoal(new BABYLON.Vector3(-144, 2, 46))
 
                             function level1(right_indicator_turned_on) {
+                                if (car.position.z > 40) {
+                                    if (!fail && !success) {
+                                        task2_text.color = "green"
+                                        win()
+                                    }
+                                }
                                 if (car.position.z < -30) {
                                     task_text.color = "white"
                                     lose()
@@ -419,12 +527,30 @@
                                     task_text.color = "green"
                                     if (fail) {
                                         task_text.color = "white"
-                                        blinkRight()
                                     }
                                 }
                             }
 
                             /*****************************End Level 1**********************************************/
+
+                            /*****************************Level 2**********************************************/
+
+                            var trafficLightTimeout;
+                            var greenLight = false
+
+                            function level2() {
+                                if (car.position.z < -20) {
+                                    if (!fail && !success) {
+                                        task2_text.color = "green"
+                                        win()
+                                    }
+                                }
+                                if (car.position.z < 60 && !greenLight) {
+                                    lose()
+                                }
+                            }
+
+                            /*****************************End Level 2**********************************************/
 
                             /********************************************End Gameplay********************************************/
 
@@ -525,6 +651,8 @@
                             function update() { // function for codes that needs constant loop
 
                                 // console.log(car.position)
+                                // console.log("pos" + camera3.position)
+                                // console.log("rot" + camera3.rotation)
                                 // console.log(car.physicsImpostor.getLinearVelocity())
 
                                 // input
@@ -596,9 +724,15 @@
                                             case 1:
                                                 level1(right_indicator_turned_on)
                                                 break
+                                            case 2:
+                                                level2()
+                                                break
                                         }
                                     case 1:
                                         cutscene1Logic()
+                                        break
+                                    case 2:
+                                        cutscene2Logic()
                                         break
                                 }
                             }
