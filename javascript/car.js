@@ -22,7 +22,7 @@ var createCar = (scene) => {
     //Create body and apply material
     var carBody = BABYLON.MeshBuilder.ExtrudeShape("body", {shape: side, path: extrudePath, cap : BABYLON.Mesh.CAP_ALL}, scene);
     carBody.material = bodyMaterial;
-    carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0.4, restitution: 0.8}, scene);
+    carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1000, friction: 0.4, restitution: 0.8}, scene);
 
     return carBody
 }
