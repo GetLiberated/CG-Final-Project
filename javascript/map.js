@@ -2,6 +2,8 @@
 
 var mapMeshes;
 var trafficLight = []
+var persons = []
+var personsAnimation = []
 function loadMap(scene) {
 
     new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "Environment.obj", scene, (meshes) => {
@@ -24,10 +26,11 @@ function loadMap(scene) {
             // mesh.showBoundingBox = true;
             mesh.checkCollisions = true
             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.8}, scene);
+            // mesh.receiveShadows = true;
         });
     });
     
-    new BABYLON.SceneLoader.ImportMesh(null, "./assets/traffic light/", "traffic light.obj", scene, (meshes) => {
+    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/Traffic Light/", "traffic light.obj", scene, (meshes) => {
         meshes.forEach((mesh, index) => {
             mesh.position = new BABYLON.Vector3(-127, 0, 40)
             mesh.scaling = new BABYLON.Vector3(0.4, 0.4, 0.4);
@@ -41,6 +44,57 @@ function loadMap(scene) {
             }
         });
     });
+
+    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", "Man.glb", scene, (meshes, particleSystem, skeleton, animationGroups) => {               
+        persons.push(meshes)
+        personsAnimation.push(animationGroups[0])
+        
+        // Modify mesh properties
+        meshes.forEach(mesh => {
+            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
+            mesh.position = new BABYLON.Vector3(-70, 0, 14)
+            mesh.rotation = new BABYLON.Vector3(0, Math.PI/2, 0)
+
+            // mesh identifier
+            // mesh.showBoundingBox = true;
+            // mesh.actionManager = new BABYLON.ActionManager(scene);
+            // mesh.actionManager.registerAction(
+            //     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
+            //         function(event) {
+            //             console.log(index);
+            //             mesh.dispose()
+            //         }
+            //     )
+            // )
+        });
+
+    })
+
+    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", "ManConstruction.glb", scene, (meshes, particleSystem, skeleton, animationGroups) => {               
+        persons.push(meshes)
+        personsAnimation.push(animationGroups[0])
+        
+        // Modify mesh properties
+        meshes.forEach(mesh => {
+            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
+            mesh.position = new BABYLON.Vector3(-10, 0, -10)
+            mesh.rotation = new BABYLON.Vector3(0, -Math.PI/2, 0)
+        });
+
+    })
+
+    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", "Woman.glb", scene, (meshes, particleSystem, skeleton, animationGroups) => {               
+        persons.push(meshes)
+        personsAnimation.push(animationGroups[0])
+        
+        // Modify mesh properties
+        meshes.forEach(mesh => {
+            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
+            mesh.position = new BABYLON.Vector3(-130, 0, 30)
+            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+        });
+
+    })
     
     // var boom = BABYLON.Mesh.CreateSphere()
     // var shader = boomShader()
@@ -95,7 +149,7 @@ function loadMap(scene) {
     var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", {size:500}, scene)
     var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene)
     skyboxMaterial.backFaceCulling = false
-    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/skybox/bluecloud", scene)
+    skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("./assets/Environments/Skybox/bluecloud", scene)
     skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
     
     skybox.infiniteDistance = true
