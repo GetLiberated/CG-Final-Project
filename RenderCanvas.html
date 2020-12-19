@@ -83,8 +83,8 @@
                             var carStartRotation = car.rotationQuaternion.clone();
                             importCarModel(scene, car)
 
-                            // map
-                            createMap(scene, car, fail, lose)
+                            // map 1
+                            loadMap(scene)
 
                             /*****************************GUI********************************************/
 
@@ -124,7 +124,7 @@
 
                             // objective
                             var rect = new BABYLON.GUI.Rectangle();
-                            rect.width = "400px";
+                            rect.width = "440px";
                             rect.height = "150px";
                             rect.cornerRadius = 20;
                             rect.background = "black";
@@ -146,7 +146,7 @@
                             gui.addControl(objective_text);
 
                             var task_text = new BABYLON.GUI.TextBlock();
-                            task_text.text = "Blink right before perempatan";
+                            task_text.text = "Turn on right blinker before crossroad";
                             task_text.color = "white";
                             task_text.fontSize = 24;
                             task_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
@@ -222,6 +222,11 @@
 
                                 var [fadeout, blink] = winAnimation(frameRate)
 
+                                var checkSFX = new BABYLON.Sound("checkSFX", "./assets/SFX/Osu! Check.mp3", scene, null, {
+                                    loop: false,
+                                    autoplay: true
+                                });
+                                
                                 scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
                                 scene.beginDirectAnimation(check, [blink], 0, 25 * frameRate, false);
                             }
@@ -267,19 +272,7 @@
                                         setTimeout(function () {
                                             mf = true
                                             setTimeout(function () {
-                                                cutscene = 0
-                                                activeCamera = 2
-                                                changeCamera()
-                                                dark_overlay.alpha = 0.5
-                                                dark_overlay.isVisible = false
-                                                mapMeshes.forEach((mesh, index) => {
-                                                    car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
-                                                        if (!fail && !success) {
-                                                            lose()
-                                                        }
-                                                    });
-                                                });
-                                                restart()
+                                                gameMode() 
                                             }, 3000)
                                         }, 1000)
                                     }, 800)
@@ -340,20 +333,8 @@
                                     }
                                 }
                                 if (car.position.z === -20 && flip) {
-                                    cutscene = 0
-                                    activeCamera = 2
-                                    changeCamera()
-                                    dark_overlay.alpha = 0.5
-                                    dark_overlay.isVisible = false
                                     car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
-                                    mapMeshes.forEach((mesh, index) => {
-                                        car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
-                                            if (!fail && !success) {
-                                                lose()
-                                            }
-                                        });
-                                    });
-                                    restart()
+                                    gameMode()
                                     flip = false
                                 }
                             }
@@ -387,22 +368,22 @@
 
                                 switch (level) {
                                     case 1:
-                                        car.position = new BABYLON.Vector3.Zero()
+                                        car.position = new BABYLON.Vector3(0, 1, 0)
                                         car.rotationQuaternion = carStartRotation.clone();
                                         break
                                     case 2:
-                                        car.position = new BABYLON.Vector3(-140, 0, 120)
+                                        car.position = new BABYLON.Vector3(-140, 1, 120)
                                         car.rotationQuaternion = carStartRotation.clone();
-                                        car.rotate(BABYLON.Axis.Y, -(Math.PI/2))
+                                        car.rotate(BABYLON.Axis.Y, -(Math.PI/2), BABYLON.Space.LOCAL)
                                         break
                                 }
                                 carWheels[0].rotation.y = 0
                                 carWheels[1].rotation.y = Math.PI
                                 carSteeringWheel.rotation.x = -0.15
                                 if (right_indicator_turned_on)
-                                blinkRight()
+                                    blinkRight()
                                 if (left_indicator_turned_on)
-                                blinkLeft()
+                                    blinkLeft()
                             }
 
                             function restart() {
@@ -417,33 +398,38 @@
                                 camera.attachControl(canvas, true)
                                 camera.parent = car
 
-                                if (level == 2) {
-                                    greenLight = false
-                                    task_text.color = "white"
-                                    trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
-                                    trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
-                                    trafficLight[2].material.emissiveColor = BABYLON.Color3.Red()
-                                    trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
-                                    trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
-                                    trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
-                                    trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
-                                    window.clearTimeout(trafficLightTimeout)
-                                    trafficLightTimeout = setTimeout(function () {
+                                switch (level) {
+                                    case 1:
+                                        task_text.color = "white"
+                                        break
+                                    case 2:
+                                        greenLight = false
+                                        task_text.color = "white"
                                         trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
                                         trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
+                                        trafficLight[2].material.emissiveColor = BABYLON.Color3.Red()
                                         trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
                                         trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
-                                        trafficLight[1].material.emissiveColor = BABYLON.Color3.Yellow()
+                                        trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                        trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                        window.clearTimeout(trafficLightTimeout)
                                         trafficLightTimeout = setTimeout(function () {
+                                            trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
+                                            trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
                                             trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
                                             trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
-                                            trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
-                                            trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
-                                            trafficLight[0].material.emissiveColor = BABYLON.Color3.Green()
-                                            greenLight = true
-                                            task_text.color = "green"
-                                        }, 1000)
-                                    }, 6000)
+                                            trafficLight[1].material.emissiveColor = BABYLON.Color3.Yellow()
+                                            trafficLightTimeout = setTimeout(function () {
+                                                trafficLight[1].material = new BABYLON.StandardMaterial('', scene)
+                                                trafficLight[1].material.diffuseColor = BABYLON.Color3.Yellow()
+                                                trafficLight[0].material = new BABYLON.StandardMaterial('', scene)
+                                                trafficLight[0].material.diffuseColor = BABYLON.Color3.Green()
+                                                trafficLight[0].material.emissiveColor = BABYLON.Color3.Green()
+                                                greenLight = true
+                                                task_text.color = "green"
+                                            }, 1000)
+                                        }, 6000)
+                                        break
                                 }
 
                                 fail = false
@@ -466,6 +452,13 @@
                                             cutscene2()
                                             break
                                         case 2:
+                                            level = 3
+                                            // goal = createGoal(new BABYLON.Vector3(-140, 2, -46))
+                                            task_text.text = "Park the car facing forward";
+                                            task_text.color = "white";
+                                            task2_text.isVisible = false
+                                            rect1.height = "30px";
+                                            cutscene3()
                                             break
                                     }
                                 }, 1500)
@@ -482,6 +475,36 @@
                                 camera.parent = null
                                 stopCarPhysicsTimeout = setTimeout(stopCarPhysics, 1000)
                                 fail = true
+                            }
+
+                            function gameMode() {
+                                cutscene = 0
+                                activeCamera = 2
+                                changeCamera()
+                                dark_overlay.alpha = 0.5
+                                dark_overlay.isVisible = false
+                                mapMeshes.forEach((mesh, index) => {
+                                    car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                        if (!fail && !success) {
+                                            switch (Math.floor(Math.random() * 2) + 1) {
+                                                case 1:
+                                                    new BABYLON.Sound("bump1", "./assets/SFX/Bump1.mp3", scene, null, {
+                                                        loop: false,
+                                                        autoplay: true
+                                                    });
+                                                    break
+                                                case 2:
+                                                    new BABYLON.Sound("bump1", "./assets/SFX/Bump2.mp3", scene, null, {
+                                                        loop: false,
+                                                        autoplay: true
+                                                    });
+                                                    break
+                                            }
+                                            lose()
+                                        }
+                                    });
+                                });
+                                restart()
                             }
 
                             function createGoal(position) {
@@ -539,7 +562,7 @@
                             var greenLight = false
 
                             function level2() {
-                                if (car.position.z < -20) {
+                                if (car.position.z < -30) {
                                     if (!fail && !success) {
                                         task2_text.color = "green"
                                         win()
@@ -648,29 +671,37 @@
 
                             /*****************************End Input********************************************/
 
+                            var vroomSFX = new BABYLON.Sound("vroomSFX", "./assets/SFX/Driving.mp3", scene, null, {
+                                loop: true
+                            });
+
                             function update() { // function for codes that needs constant loop
 
                                 // console.log(car.position)
+                                // console.log(car.rotationQuaternion.y)
                                 // console.log("pos" + camera3.position)
                                 // console.log("rot" + camera3.rotation)
-                                // console.log(car.physicsImpostor.getLinearVelocity())
 
                                 // input
                                 // add thrust to car physics
                                 if (mf == true) {
-                                    translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
-                                    // if (car.physicsImpostor.getLinearVelocity().x < -maxSpeed) {}
-                                    // else car.physicsImpostor.applyImpulse(new BABYLON.Vector3(-1, 0, 0).scale(1), car.getAbsolutePosition().add(BABYLON.Vector3.Zero()));
-
+                                        translate(car, new BABYLON.Vector3(-1, 0, 0), 1);
                                     if (carWheels[0].rotation.y < -0.05)
                                         rotate(car, new BABYLON.Vector3(0, -1, 0), -carWheels[0].rotation.y / 4);
-                                    // car.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, 1).scale(0.1), car.getAbsolutePosition());
                                     if (carWheels[0].rotation.y > 0.05)
                                         rotate(car, new BABYLON.Vector3(0, 1, 0), carWheels[0].rotation.y / 4);
-                                    // car.physicsImpostor.applyImpulse(new BABYLON.Vector3(0, 0, -1).scale(1), car.getAbsolutePosition());
+                                    if (!vroomSFX.isPlaying && !fail && !success) {
+                                        vroomSFX.play();
+                                    }
+                                }
+                                if (!mf) {
+                                    if (vroomSFX.isPlaying) {
+                                        vroomSFX.stop();
+                                        vroomSFX.isPlaying = false; // make sure that vroomSFX.stop is called only once
+                                    }
                                 }
                                 if (mb == true) {
-                                    translate(car, new BABYLON.Vector3(1, 0, 0), 1);
+                                        translate(car, new BABYLON.Vector3(1, 0, 0), 1);
                                     if (carWheels[0].rotation.y < -0.05)
                                         rotate(car, new BABYLON.Vector3(0, 1, 0), -carWheels[0].rotation.y / 4);
                                     if (carWheels[0].rotation.y > 0.05)
@@ -715,6 +746,14 @@
                                             mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().x / 16
                                     })
                                 }
+                                if (car.physicsImpostor.getLinearVelocity().z < -0.1 || car.physicsImpostor.getLinearVelocity().z > 0.1) {
+                                    carWheels.forEach((mesh, index) => {
+                                        if (index % 2)
+                                            mesh.rotation.z += car.physicsImpostor.getLinearVelocity().z / 16
+                                        else
+                                            mesh.rotation.z -= car.physicsImpostor.getLinearVelocity().z / 16
+                                    })
+                                }
 
                                 // cutscene
                                 switch (cutscene) {
@@ -742,6 +781,19 @@
                             
                             // display loading screen while loading assets
                             engine.displayLoadingUI();
+
+                            // Load the sound and play it automatically once ready
+                            var music = new BABYLON.Sound("Music", "./assets/Music/#8 regret (Dedf1sh) - Splatoon 2_ Octo Expansion Music Extended (64 kbps).mp3", scene, null, {
+                                loop: true,
+                                autoplay: true
+                            });
+
+                            // set the global sound volume
+                            BABYLON.Engine.audioEngine.setGlobalVolume(0.5);
+
+                            scene.onNewMaterialAddedObservable.add(function(mat) {
+                                mat.backFaceCulling = false;
+                            });
 
                             scene.registerBeforeRender(function () {
                                 update();
