@@ -16,6 +16,7 @@
     <script src="./javascript/physics.js"></script>
     <script src="./javascript/car.js"></script>
     <script src="./javascript/map.js"></script>
+    <script src="./javascript/npc.js"></script>
     <script src="./javascript/animation.js"></script>
     <script src="./javascript/shader.js"></script>
 
@@ -96,6 +97,9 @@
 
                             // map 1
                             loadMap(scene)
+                            createNPC(1, new BABYLON.Vector3(-70, 0, 14), new BABYLON.Vector3(0, Math.PI/2, 0))
+                            createNPC(2, new BABYLON.Vector3(-10, 0, -10), new BABYLON.Vector3(0, -Math.PI/2, 0))
+                            createNPC(3, new BABYLON.Vector3(-130, 0, 30), new BABYLON.Vector3(0, 0, 0))
 
                             /*****************************GUI********************************************/
 
@@ -355,56 +359,45 @@
                                     })
                                     persons.length = 0
                                     personsAnimation.length = 0
-                                    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", "Man.glb", scene, (meshes, particleSystem, skeleton, animationGroups) => {               
-                                        persons.push(meshes)
-                                        personsAnimation.push(animationGroups[0])
-                                        
-                                        // Modify mesh properties
-                                        meshes.forEach(mesh => {
-                                            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
-                                            mesh.position = new BABYLON.Vector3(-155, 0, 50)
-                                            mesh.rotation = new BABYLON.Vector3(0, 0, 0)
-                                        });
-                                    })
-
-                                    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", "ManConstruction.glb", scene, (meshes, particleSystem, skeleton, animationGroups) => {               
-                                        persons.push(meshes)
-                                        personsAnimation.push(animationGroups[0])
-                                        
-                                        // Modify mesh properties
-                                        meshes.forEach(mesh => {
-                                            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
-                                            mesh.position = new BABYLON.Vector3(-130, 0, 100)
-                                            mesh.rotation = new BABYLON.Vector3(0, -Math.PI, 0)
-                                        });
-                                    })
-
-                                    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", "Woman.glb", scene, (meshes, particleSystem, skeleton, animationGroups) => {               
-                                        persons.push(meshes)
-                                        personsAnimation.push(animationGroups[0])
-                                        
-                                        // Modify mesh properties
-                                        meshes.forEach(mesh => {
-                                            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
-                                            mesh.position = new BABYLON.Vector3(-130, 0, 110)
-                                            mesh.rotation = new BABYLON.Vector3(0, -Math.PI, 0)
-                                        });
-                                    })
+                                    createNPC(1, new BABYLON.Vector3(-155, 0, 50), new BABYLON.Vector3(0, 0, 0))
+                                    createNPC(2, new BABYLON.Vector3(-130, 0, 100), new BABYLON.Vector3(0, -Math.PI, 0))
+                                    createNPC(3, new BABYLON.Vector3(-130, 0, 110), new BABYLON.Vector3(0, -Math.PI, 0))
                                     gameMode()
                                     flip = false
                                 }
                                 else {
                                     // npc
                                     persons[0].forEach(mesh => {
-                                        mesh.position.x += 0.1
+                                        mesh.position.x += 0.025
                                     })
                                     persons[1].forEach(mesh => {
-                                        mesh.position.x -= 0.1
+                                        mesh.position.x -= 0.025
                                     })
                                     persons[2].forEach(mesh => {
-                                        mesh.position.z += 0.1
+                                        mesh.position.z += 0.025
                                     })
                                 }
+                            }
+
+                            // Cutscene 3
+
+                            function cutscene3() {
+                                cutscene = 3
+                                activeCamera = 3
+                                scene.activeCamera = camera3
+                                
+                                dark_overlay.alpha = 0
+                                dark_overlay.isVisible = true
+                                check.isVisible = false
+
+                                resetCar()
+                                car.physicsImpostor.dispose()
+
+                                var [camera_rotate, camera_position, car_move, fadeout] = cutscene3Animation(frameRate)
+
+                                scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
                             }
 
                             /********************************************End Animations********************************************/
@@ -633,13 +626,13 @@
                                 }
                                 // npc
                                 persons[0].forEach(mesh => {
-                                    mesh.position.x += 0.1
+                                    mesh.position.x += 0.025
                                 })
                                 persons[1].forEach(mesh => {
-                                    mesh.position.x -= 0.1
+                                    mesh.position.x -= 0.025
                                 })
                                 persons[2].forEach(mesh => {
-                                    mesh.position.z += 0.1
+                                    mesh.position.z += 0.025
                                 })
                             }
 
@@ -663,13 +656,13 @@
                                 // npc
                                 if (persons[2] !== undefined) {
                                     persons[0].forEach(mesh => {
-                                        mesh.position.z += 0.1
+                                        mesh.position.z += 0.025
                                     })
                                     persons[1].forEach(mesh => {
-                                        mesh.position.z -= 0.1
+                                        mesh.position.z -= 0.025
                                     })
                                     persons[2].forEach(mesh => {
-                                        mesh.position.z -= 0.1
+                                        mesh.position.z -= 0.025
                                     })
                                 }
                             }
