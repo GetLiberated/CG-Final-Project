@@ -14,6 +14,7 @@ function loadMap(scene) {
             mesh.position = new BABYLON.Vector3(0, 0, 0)
             mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
             mesh.rotation = new BABYLON.Vector3(0, 0, 0)
+            mesh.freezeWorldMatrix();
             // mesh.showBoundingBox = true;
             mesh.checkCollisions = true
             mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);

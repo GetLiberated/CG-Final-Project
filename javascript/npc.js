@@ -13,7 +13,9 @@ function createNPC(npc, position, rotation) {
     }
     new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", model_name, scene, (meshes, particleSystem, skeleton, animationGroups) => {               
         persons.push(meshes)
-        personsAnimation.push(animationGroups[0])
+        personsAnimation.push(animationGroups)
+        animationGroups[0].stop()
+        animationGroups[2].play(true)
         
         // Modify mesh properties
         meshes.forEach(mesh => {
