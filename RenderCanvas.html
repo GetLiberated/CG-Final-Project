@@ -16,6 +16,7 @@
     <script src="./javascript/physics.js"></script>
     <script src="./javascript/car.js"></script>
     <script src="./javascript/map.js"></script>
+    <script src="./javascript/npc.js"></script>
     <script src="./javascript/animation.js"></script>
     <script src="./javascript/shader.js"></script>
 
@@ -67,14 +68,25 @@
 
                             // lights
                             var light1 = new BABYLON.DirectionalLight("light1", new BABYLON.Vector3(1, 2, 0), scene);
+                            // light1.position = new BABYLON.Vector3(20, 40, 20);
+	                        // light1.intensity = 0.5;
                             var light2 = new BABYLON.HemisphericLight("light2", new BABYLON.Vector3(0, 1, 0), scene);
                             light2.intensity = 0.75;
+
+                            // var lightSphere = BABYLON.Mesh.CreateSphere("sphere", 10, 2, scene);
+                            // lightSphere.position = light1.position;
+                            // lightSphere.material = new BABYLON.StandardMaterial("light", scene);
+                            // lightSphere.material.emissiveColor = new BABYLON.Color3(1, 1, 0);
 
                             // glow layer
                             var gl = new BABYLON.GlowLayer("glow", scene, {
                                 mainTextureFixedSize: 1024,
                                 blurKernelSize: 64
                             });
+
+                            // Shadows
+                            // var shadowGenerator = new BABYLON.ShadowGenerator(1024, light1);
+                            // shadowGenerator.useExponentialShadowMap = true;
 
                             // car
                             var car = createCar(scene)
@@ -85,6 +97,12 @@
 
                             // map 1
                             loadMap(scene)
+                            createNPC(1, new BABYLON.Vector3(-70, 0, 14), new BABYLON.Vector3(0, Math.PI/2, 0))
+                            createNPC(2, new BABYLON.Vector3(-10, 0, -10), new BABYLON.Vector3(0, -Math.PI/2, 0))
+                            createNPC(3, new BABYLON.Vector3(-130, 0, 30), new BABYLON.Vector3(0, 0, 0))
+
+                            // map 2 (disabled)
+                            loadMap2(scene)
 
                             /*****************************GUI********************************************/
 
@@ -222,7 +240,7 @@
 
                                 var [fadeout, blink] = winAnimation(frameRate)
 
-                                var checkSFX = new BABYLON.Sound("checkSFX", "./assets/SFX/Osu! Check.mp3", scene, null, {
+                                new BABYLON.Sound("checkSFX", "./assets/SFX/Osu! Check.mp3", scene, null, {
                                     loop: false,
                                     autoplay: true
                                 });
@@ -278,9 +296,19 @@
                                     }, 800)
                                     flip = false
                                 }
+                                // npc
+                                persons[0].forEach(mesh => {
+                                    mesh.position.x += 0.025
+                                })
+                                persons[1].forEach(mesh => {
+                                    mesh.position.x -= 0.025
+                                })
+                                persons[2].forEach(mesh => {
+                                    mesh.position.z += 0.025
+                                })
                             }
 
-                            // cutscene1()
+                            cutscene1()
 
                             // Cutscene 2
 
@@ -295,6 +323,12 @@
 
                                 resetCar()
                                 car.physicsImpostor.dispose()
+                                recycle(persons)
+                                persons.length = 0
+                                personsAnimation.length = 0
+                                createNPC(1, new BABYLON.Vector3(-155, 0, 50), new BABYLON.Vector3(0, 0, 0))
+                                createNPC(2, new BABYLON.Vector3(-130, 0, 100), new BABYLON.Vector3(0, -Math.PI, 0))
+                                createNPC(3, new BABYLON.Vector3(-130, 0, 110), new BABYLON.Vector3(0, -Math.PI, 0))
 
                                 trafficLight[2].material = new BABYLON.StandardMaterial('', scene)
                                 trafficLight[2].material.diffuseColor = BABYLON.Color3.Red()
@@ -334,8 +368,56 @@
                                 }
                                 if (car.position.z === -20 && flip) {
                                     car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    persons[1].forEach(mesh => {
+                                        mesh.position.z = 100
+                                    })
+                                    persons[2].forEach(mesh => {
+                                        mesh.position.z = 110
+                                    })
                                     gameMode()
                                     flip = false
+                                }
+                                
+                                if (persons[2] !== undefined) {
+                                    // npc
+                                    persons[0].forEach(mesh => {
+                                        mesh.position.z += 0.025
+                                    })
+                                    persons[1].forEach(mesh => {
+                                        mesh.position.z -= 0.025
+                                    })
+                                    persons[2].forEach(mesh => {
+                                        mesh.position.z -= 0.025
+                                    })
+                                }
+                            }
+
+                            // Cutscene 3
+
+                            function cutscene3() {
+                                cutscene = 3
+                                activeCamera = 3
+                                scene.activeCamera = camera3
+                                // scene.activeCamera.attachControl(canvas, true);
+                                
+                                dark_overlay.alpha = 0
+                                dark_overlay.isVisible = true
+                                check.isVisible = false
+
+                                resetCar()
+                                car.physicsImpostor.dispose()
+
+                                var [camera_rotate, camera_position, fadeout] = cutscene3Animation(frameRate)
+
+                                scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
+                                scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
+                            }
+
+                            function cutscene3Logic() {
+                                if (camera3.position.x === -100 && !flip) {
+                                    car.physicsImpostor = new BABYLON.PhysicsImpostor(car, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: 0.4, restitution: 0.8 }, scene);
+                                    gameMode()
+                                    flip = true
                                 }
                             }
 
@@ -375,6 +457,11 @@
                                         car.position = new BABYLON.Vector3(-140, 1, 120)
                                         car.rotationQuaternion = carStartRotation.clone();
                                         car.rotate(BABYLON.Axis.Y, -(Math.PI/2), BABYLON.Space.LOCAL)
+                                        break
+                                    case 3:
+                                        car.position = new BABYLON.Vector3(-44, -12.4, -18)
+                                        car.rotationQuaternion = carStartRotation.clone();
+                                        car.rotate(BABYLON.Axis.Y, -(Math.PI), BABYLON.Space.LOCAL)
                                         break
                                 }
                                 carWheels[0].rotation.y = 0
@@ -453,11 +540,19 @@
                                             break
                                         case 2:
                                             level = 3
-                                            // goal = createGoal(new BABYLON.Vector3(-140, 2, -46))
+                                            goal = createGoal(new BABYLON.Vector3(-20, -10, -6))
                                             task_text.text = "Park the car facing forward";
                                             task_text.color = "white";
                                             task2_text.isVisible = false
                                             rect1.height = "30px";
+                                            recycle([mapMeshes, trafficLightMeshes, roadMeshes])
+                                            recycle(persons)
+                                            mapMeshes2.forEach(mesh => {
+                                                mesh.setEnabled(true)
+                                            })
+                                            roadMeshes2.forEach(mesh => {
+                                                mesh.setEnabled(true)
+                                            })
                                             cutscene3()
                                             break
                                     }
@@ -483,27 +578,67 @@
                                 changeCamera()
                                 dark_overlay.alpha = 0.5
                                 dark_overlay.isVisible = false
-                                mapMeshes.forEach((mesh, index) => {
-                                    car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
-                                        if (!fail && !success) {
-                                            switch (Math.floor(Math.random() * 2) + 1) {
-                                                case 1:
-                                                    new BABYLON.Sound("bump1", "./assets/SFX/Bump1.mp3", scene, null, {
-                                                        loop: false,
-                                                        autoplay: true
-                                                    });
-                                                    break
-                                                case 2:
-                                                    new BABYLON.Sound("bump1", "./assets/SFX/Bump2.mp3", scene, null, {
-                                                        loop: false,
-                                                        autoplay: true
-                                                    });
-                                                    break
+                                if (level !== 3) {
+                                    mapMeshes.forEach((mesh, index) => {
+                                        car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                            if (!fail && !success) {
+                                                switch (Math.floor(Math.random() * 2) + 1) {
+                                                    case 1:
+                                                        new BABYLON.Sound("bump1", "./assets/SFX/Bump1.mp3", scene, null, {
+                                                            loop: false,
+                                                            autoplay: true
+                                                        });
+                                                        break
+                                                    case 2:
+                                                        new BABYLON.Sound("bump1", "./assets/SFX/Bump2.mp3", scene, null, {
+                                                            loop: false,
+                                                            autoplay: true
+                                                        });
+                                                        break
+                                                }
+                                                lose()
                                             }
-                                            lose()
-                                        }
+                                        });
                                     });
-                                });
+                                    persons.forEach((person, index) => {
+                                        person.forEach(mesh => {
+                                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1}, scene);
+                                            car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                                if (!fail && !success) {
+                                                    personsAnimation[index].stop()
+                                                    lose()
+                                                }
+                                            });
+                                        })
+                                    })
+                                }
+                                else {
+                                    mapMeshes2.forEach((mesh, index) => {
+                                        mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0}, scene);
+                                        car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
+                                            if (!fail && !success) {
+                                                switch (Math.floor(Math.random() * 2) + 1) {
+                                                    case 1:
+                                                        new BABYLON.Sound("bump1", "./assets/SFX/Bump1.mp3", scene, null, {
+                                                            loop: false,
+                                                            autoplay: true
+                                                        });
+                                                        break
+                                                    case 2:
+                                                        new BABYLON.Sound("bump1", "./assets/SFX/Bump2.mp3", scene, null, {
+                                                            loop: false,
+                                                            autoplay: true
+                                                        });
+                                                        break
+                                                }
+                                                lose()
+                                            }
+                                        });
+                                    });
+                                    roadMeshes2.forEach((mesh, index) => {
+                                        mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 0 , friction: 0.8}, scene);
+                                    });
+                                }
                                 restart()
                             }
 
@@ -533,7 +668,7 @@
                             var goal = createGoal(new BABYLON.Vector3(-144, 2, 46))
 
                             function level1(right_indicator_turned_on) {
-                                if (car.position.z > 40) {
+                                if (car.position.z > 35) {
                                     if (!fail && !success) {
                                         task2_text.color = "green"
                                         win()
@@ -552,6 +687,16 @@
                                         task_text.color = "white"
                                     }
                                 }
+                                // npc
+                                persons[0].forEach(mesh => {
+                                    mesh.position.x += 0.15
+                                })
+                                persons[1].forEach(mesh => {
+                                    mesh.position.x -= 0.15
+                                })
+                                persons[2].forEach(mesh => {
+                                    mesh.position.z += 0.15
+                                })
                             }
 
                             /*****************************End Level 1**********************************************/
@@ -562,7 +707,7 @@
                             var greenLight = false
 
                             function level2() {
-                                if (car.position.z < -30) {
+                                if (car.position.z < -33) {
                                     if (!fail && !success) {
                                         task2_text.color = "green"
                                         win()
@@ -571,6 +716,16 @@
                                 if (car.position.z < 60 && !greenLight) {
                                     lose()
                                 }
+                                // npc
+                                persons[0].forEach(mesh => {
+                                    mesh.position.z += 0.15
+                                })
+                                persons[1].forEach(mesh => {
+                                    mesh.position.z -= 0.15
+                                })
+                                persons[2].forEach(mesh => {
+                                    mesh.position.z -= 0.15
+                                })
                             }
 
                             /*****************************End Level 2**********************************************/
@@ -634,6 +789,9 @@
                                         case 86://v
                                             changeCamera()
                                             break;
+                                        case 49://1
+                                            gameMode()
+                                            break;
                                     }
                                 }
                             });
@@ -675,12 +833,20 @@
                                 loop: true
                             });
 
+                            function recycle(arr) {
+                                arr.forEach((meshes, index) => {
+                                    meshes.forEach(mesh => {
+                                        mesh.dispose()
+                                    })
+                                })
+                            }
+
                             function update() { // function for codes that needs constant loop
 
                                 // console.log(car.position)
                                 // console.log(car.rotationQuaternion.y)
-                                // console.log("pos" + camera3.position)
-                                // console.log("rot" + camera3.rotation)
+                                // console.log("pos " + camera3.position)
+                                // console.log("rot " + camera3.rotation)
 
                                 // input
                                 // add thrust to car physics
@@ -756,24 +922,20 @@
                                 }
 
                                 // cutscene
-                                switch (cutscene) {
-                                    case 0:
-                                        // level
-                                        switch (level) {
-                                            case 1:
-                                                level1(right_indicator_turned_on)
-                                                break
-                                            case 2:
-                                                level2()
-                                                break
-                                        }
-                                    case 1:
-                                        cutscene1Logic()
-                                        break
-                                    case 2:
-                                        cutscene2Logic()
-                                        break
+                                if (cutscene === 0) {
+                                    if (level === 1) {
+                                        level1(right_indicator_turned_on)
+                                    }
+                                    if (level === 2) {
+                                        level2()
+                                    }
                                 }
+                                if (cutscene === 1)
+                                cutscene1Logic()
+                                if (cutscene === 2)
+                                cutscene2Logic()
+                                if (cutscene === 3)
+                                cutscene3Logic()
                             }
 
                             // show inspector
