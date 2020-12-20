@@ -255,10 +255,12 @@
                                 cutscene = 1
                                 activeCamera = 3
                                 scene.activeCamera = camera3
-                                car.physicsImpostor.dispose()
+
                                 dark_overlay.alpha = 0
                                 dark_overlay.isVisible = true
-
+                                
+                                car.physicsImpostor.dispose()
+                                
                                 var [camera_rotate, camera_position, car_move, fadeout] = cutscene1Animation(frameRate)
 
                                 scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
@@ -485,6 +487,11 @@
                                 camera.attachControl(canvas, true)
                                 camera.parent = car
 
+                                personsAnimation.forEach(anim => {
+                                    anim[1].stop() 
+                                    anim[2].play(true) 
+                                })
+
                                 switch (level) {
                                     case 1:
                                         task_text.color = "white"
@@ -602,10 +609,17 @@
                                     });
                                     persons.forEach((person, index) => {
                                         person.forEach(mesh => {
-                                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1}, scene);
+                                            mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1, friction: 0, restitution: 0}, scene);
                                             car.physicsImpostor.registerOnPhysicsCollide(mesh.physicsImpostor, function (main, collided) {
                                                 if (!fail && !success) {
-                                                    personsAnimation[index].stop()
+                                                    personsAnimation[index][2].stop()
+                                                    personsAnimation[index][0].play()
+                                                    personsAnimation.forEach((anim, i) => {
+                                                        if (i !== index) {
+                                                            personsAnimation[i][2].stop()
+                                                            anim[1].play(true)
+                                                        } 
+                                                    })
                                                     lose()
                                                 }
                                             });
@@ -688,15 +702,17 @@
                                     }
                                 }
                                 // npc
-                                persons[0].forEach(mesh => {
-                                    mesh.position.x += 0.15
-                                })
-                                persons[1].forEach(mesh => {
-                                    mesh.position.x -= 0.15
-                                })
-                                persons[2].forEach(mesh => {
-                                    mesh.position.z += 0.15
-                                })
+                                if (personsAnimation.every(anim => anim[2].isPlaying === true)) {
+                                    persons[0].forEach(mesh => {
+                                        mesh.position.x += 0.15
+                                    })
+                                    persons[1].forEach(mesh => {
+                                        mesh.position.x -= 0.15
+                                    })
+                                    persons[2].forEach(mesh => {
+                                        mesh.position.z += 0.15
+                                    })
+                                }
                             }
 
                             /*****************************End Level 1**********************************************/
@@ -717,15 +733,17 @@
                                     lose()
                                 }
                                 // npc
-                                persons[0].forEach(mesh => {
-                                    mesh.position.z += 0.15
-                                })
-                                persons[1].forEach(mesh => {
-                                    mesh.position.z -= 0.15
-                                })
-                                persons[2].forEach(mesh => {
-                                    mesh.position.z -= 0.15
-                                })
+                                if (personsAnimation.every(anim => anim[2].isPlaying === true)) {
+                                    persons[0].forEach(mesh => {
+                                        mesh.position.z += 0.15
+                                    })
+                                    persons[1].forEach(mesh => {
+                                        mesh.position.z -= 0.15
+                                    })
+                                    persons[2].forEach(mesh => {
+                                        mesh.position.z -= 0.15
+                                    })
+                                }
                             }
 
                             /*****************************End Level 2**********************************************/
@@ -953,6 +971,7 @@
                             // set the global sound volume
                             BABYLON.Engine.audioEngine.setGlobalVolume(0.5);
 
+                            // disable backface culling for new material loaded
                             scene.onNewMaterialAddedObservable.add(function(mat) {
                                 mat.backFaceCulling = false;
                             });
