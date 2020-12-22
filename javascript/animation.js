@@ -1,3 +1,23 @@
+/*
+
+Feel free to use my animations but be warned that you must have the same map/scene as I do, otherwise it would not work.
+
+Usage:
+cutscene1Animation(frameRate)
+
+Parameter:
+frameRate = int
+
+Example:
+Cutscene 1,
+var [camera_rotate, camera_position, car_move, fadeout] = cutscene1Animation(frameRate)
+
+scene.beginDirectAnimation(camera3, [camera_position, camera_rotate], 0, 25 * frameRate, false);
+scene.beginDirectAnimation(car, [car_move], 0, 25 * frameRate, false);
+scene.beginDirectAnimation(dark_overlay, [fadeout], 0, 25 * frameRate, false);
+
+*/
+
 function winAnimation(frameRate) {
     var fadeout = new BABYLON.Animation("fadeout", "alpha", frameRate, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT);
 
@@ -542,11 +562,6 @@ function cutscene3Animation(frameRate) {
 
     fadeout_keys.push({
         frame: 1 * frameRate,
-        value: 1
-    });
-
-    fadeout_keys.push({
-        frame: 2 * frameRate,
         value: 0
     });
 

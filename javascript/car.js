@@ -1,3 +1,52 @@
+/*
+
+Create a fully textured car with pbr material and transparent glasses with functioning car lights.
+
+Usage:
+createCar(scene)
+
+Note: Babylonjs physics are expected to be enabled.
+
+Parameter:
+scene = BABYLON.Scene()
+
+Example:
+If you want to create the car,
+var car = createCar(scene)
+
+If you want to access the car's tires,
+carWheels[0] = Top left tire
+carWheels[1] = Top right tire
+carWheels[2] = Bottom left tire
+carWheels[3] = Bottom left tire
+
+If you want to access the car's lights,
+carLights[0][0] = Left front light
+carLights[0][1] = Left wing mirror light
+carLights[0][2] = Left back light
+carLights[1][0] = Right front light
+carLights[1][1] = Right wing mirror light
+carLights[1][2] = Right back light
+
+If you want to rotate the car's steering wheel,
+carSteeringWheel.rotation.x += 30
+
+If you want to turn on/off the car's blinker light (calling it again will reverse its effect),
+blinkLeft()
+blinkRight()
+
+If you want to turn on the car's brake light,
+brakeLight(true)
+
+If you want to turn off the car's brake light,
+brakeLight(false)
+
+If you want to get the state of the car's blinker light (currently turned on or off),
+if (left_indicator_turned_on) {}
+if (right_indicator_turned_on) {}
+
+*/
+
 /***************************Car*********************************************/
                     
 var createCar = (scene) => {
@@ -23,6 +72,9 @@ var createCar = (scene) => {
     var carBody = BABYLON.MeshBuilder.ExtrudeShape("body", {shape: side, path: extrudePath, cap : BABYLON.Mesh.CAP_ALL}, scene);
     carBody.material = bodyMaterial;
     carBody.physicsImpostor = new BABYLON.PhysicsImpostor(carBody, BABYLON.PhysicsImpostor.BoxImpostor, {mass: 1000, friction: 0.4, restitution: 0.8}, scene);
+
+    //Import car model and attach it to car body
+    importCarModel(scene, carBody)
 
     return carBody
 }
@@ -276,6 +328,18 @@ function blinkRight() {
         })
     }
     right_indicator_turned_on = !right_indicator_turned_on
+}
+
+function brakeLight(turn_on) {
+    if (turn_on) {
+        var mat = new BABYLON.StandardMaterial('', scene)
+        mat.diffuseColor = BABYLON.Color3.Red()
+        mat.emissiveColor = BABYLON.Color3.Red()
+        carLights[1][0].material = carLights[0][0].material = mat
+    }
+    else {
+        carLights[1][0].material = carLights[0][0].material = carLightStartMaterial
+    }
 }
 
 /***************************End Car*********************************************/

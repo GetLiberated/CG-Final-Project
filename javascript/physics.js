@@ -1,3 +1,27 @@
+/*
+
+Functions for manipulating babylonjs physics velocity.
+
+Usage:
+translate(mesh, direction, power);
+rotate(mesh, direction, power);
+
+Note: Babylonjs physics are expected to be enabled.
+
+Parameter:
+mesh = BABYLON.PhysicsImpostor
+direction = new BABYLON.Vector3(0, 0, 0)
+power = int/float
+
+Example:
+If you want to add forward force to mesh,
+translate(mesh, new BABYLON.Vector3(-1, 0, 0), 1);
+
+If you want to add left rotation force to mesh,
+rotate(car, new BABYLON.Vector3(0, 1, 0), 1)
+
+*/
+
 /*****************************Physics********************************************/
 
 function transformForce(mesh, vec) {
