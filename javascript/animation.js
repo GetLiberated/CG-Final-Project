@@ -464,6 +464,16 @@ function cutscene3Animation(frameRate) {
         value: new BABYLON.Vector3(-0.01, 1.57, 0)
     });
 
+    camera_rotate_keys.push({
+        frame: 20 * frameRate,
+        value: new BABYLON.Vector3(-0.01, 1.57, 0)
+    });
+
+    camera_rotate_keys.push({
+        frame: 21 * frameRate,
+        value: new BABYLON.Vector3(0, 3.17, 0)
+    });
+
 
 
 
@@ -536,14 +546,19 @@ function cutscene3Animation(frameRate) {
         value: new BABYLON.Vector3(-90.3, -6.4, -19)
     });
 
-    camera_position_keys.push({ // stay
+    camera_position_keys.push({ // forward
         frame: 20 * frameRate,
-        value: new BABYLON.Vector3(-90.3, -6.4, -19)
+        value: new BABYLON.Vector3(-12.5, -6.4, -19)
+    });
+
+    camera_position_keys.push({ // stay
+        frame: 21 * frameRate,
+        value: new BABYLON.Vector3(-12.5, -6.4, -19)
     });
 
     camera_position_keys.push({ // trigger
-        frame: 21 * frameRate,
-        value: new BABYLON.Vector3(-100, -6.4, -19)
+        frame: 23 * frameRate,
+        value: new BABYLON.Vector3(-12.5, -6.4, -20)
     });
 
 
@@ -581,12 +596,12 @@ function cutscene3Animation(frameRate) {
     });
 
     fadeout_keys.push({
-        frame: 19 * frameRate,
+        frame: 21 * frameRate,
         value: 0
     });
 
     fadeout_keys.push({
-        frame: 20 * frameRate,
+        frame: 22 * frameRate,
         value: 1
     });
 

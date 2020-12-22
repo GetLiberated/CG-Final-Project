@@ -53,7 +53,7 @@ trafficLight[0] = Green light
 var mapMeshes; // store all map 1 environment meshes here.
 var roadMeshes; // store all map 1 road meshes here.
 
-var mapMeshes2; // store all map 2 environment meshes here.
+var mapMeshes2 = []; // store all map 2 environment meshes here.
 var roadMeshes2 = []; // store all map 2 road meshes here.
 
 var trafficLightMeshes; // store traffic light meshes here.
@@ -114,7 +114,7 @@ function loadMap(map_type, set_boundary, load_skybox, scene, disabled = false) {
 
         case 2:
             new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "MallBasement.obj", scene, (meshes) => {
-                mapMeshes2 = meshes
+                mapMeshes2.push(meshes)
                 meshes.forEach((mesh, index) => {
                     mesh.position = new BABYLON.Vector3(0, 0, 0)
                     mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
@@ -140,18 +140,6 @@ function loadMap(map_type, set_boundary, load_skybox, scene, disabled = false) {
                 });
             });
         
-            // new BABYLON.SceneLoader.ImportMesh(null, "./assets/Environments/", "MallFloor.obj", scene, (meshes) => {
-            //     roadMeshes2.push(meshes)
-            //     meshes.forEach((mesh, index) => {
-            //         mesh.position = new BABYLON.Vector3(0, 0, 0)
-            //         mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
-            //         mesh.rotation = new BABYLON.Vector3(0, 0, 0)
-            //         // mesh.showBoundingBox = true;
-            //         mesh.checkCollisions = true
-            //         mesh.setEnabled(false)
-            //     });
-            // });
-        
             var basementFloor = BABYLON.MeshBuilder.CreatePlane("plane", {size: 300}, scene);
             basementFloor.rotation.x = Math.PI/2
             basementFloor.position.y = -12.6
@@ -162,6 +150,42 @@ function loadMap(map_type, set_boundary, load_skybox, scene, disabled = false) {
             var mat = new BABYLON.StandardMaterial("mat", scene);
             mat.diffuseColor = new BABYLON.Color3(0.1603774, 0.1603774, 0.1603774);
             basementFloor.material = mat
+        
+            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/", "Car1.obj", scene, (meshes) => {
+                var mesh = BABYLON.Mesh.MergeMeshes(meshes, true, true, null, false, true);
+                mesh.position = new BABYLON.Vector3(5, -22.2, -72)
+                mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
+                mesh.rotation = new BABYLON.Vector3(0, Math.PI/2, 0)
+                // mesh.showBoundingBox = true;
+                mesh.checkCollisions = true
+                if (disabled)
+                    mesh.setEnabled(false)
+                mapMeshes2.push([mesh])
+            });
+
+            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/", "Car2.obj", scene, (meshes) => {
+                var mesh = BABYLON.Mesh.MergeMeshes(meshes, true, true, null, false, true);
+                mesh.position = new BABYLON.Vector3(5, -22.2, -82)
+                mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
+                mesh.rotation = new BABYLON.Vector3(0, -Math.PI, 0)
+                // mesh.showBoundingBox = true;
+                mesh.checkCollisions = true
+                if (disabled)
+                    mesh.setEnabled(false)
+                mapMeshes2.push([mesh])
+            });
+
+            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/", "Car3.obj", scene, (meshes) => {
+                var mesh = BABYLON.Mesh.MergeMeshes(meshes, true, true, null, false, true);
+                mesh.position = new BABYLON.Vector3(5, -22.2, -92)
+                mesh.scaling = new BABYLON.Vector3(3.2, 3.2, 3.2);
+                mesh.rotation = new BABYLON.Vector3(0, -Math.PI/2, 0)
+                // mesh.showBoundingBox = true;
+                mesh.checkCollisions = true
+                if (disabled)
+                    mesh.setEnabled(false)
+                mapMeshes2.push([mesh])
+            });
             break
     }
     
