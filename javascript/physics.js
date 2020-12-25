@@ -10,7 +10,7 @@ Note: Babylonjs physics are expected to be enabled.
 
 Parameter:
 mesh = BABYLON.PhysicsImpostor
-direction = new BABYLON.Vector3(0, 0, 0)
+direction = BABYLON.Vector3()
 power = int/float
 
 Example:

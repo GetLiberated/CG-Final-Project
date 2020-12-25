@@ -89,7 +89,7 @@ var carMeshes;
 
 function importCarModel(scene, car, shadowGenerator) {
 
-    new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
+    new BABYLON.SceneLoader.ImportMesh(null, "assets/Vehicle/Volkswagen Touareg 2/model/", "Touareg.obj", scene, (meshes) => {
         carMeshes = meshes
         meshes.forEach((mesh, index) => {
             mesh.parent = car
@@ -110,7 +110,7 @@ function importCarModel(scene, car, shadowGenerator) {
             leftLightIndex.forEach(i => {
                 if (i == index) {
                     var mat = new BABYLON.StandardMaterial('mat', scene);
-                    mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/GLBK11.jpg");
+                    mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/GLBK11.jpg");
                     mat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
                     mat.backFaceCulling = false
                     mesh.material = mat;
@@ -123,7 +123,7 @@ function importCarModel(scene, car, shadowGenerator) {
             rightLightIndex.forEach(i => {
                 if (i == index) {
                     var mat = new BABYLON.StandardMaterial('mat', scene);
-                    mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/GLBK11.jpg");
+                    mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/GLBK11.jpg");
                     mat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
                     mat.backFaceCulling = false
                     mesh.material = mat;
@@ -137,7 +137,7 @@ function importCarModel(scene, car, shadowGenerator) {
     
                 pbr.metallic = 0.0;
                 pbr.roughness = 0;   
-                pbr.albedoTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/AS2_carpaint_metallic.jpg");
+                pbr.albedoTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/AS2_carpaint_metallic.jpg");
                 pbr.backFaceCulling = false
             }
     
@@ -154,7 +154,7 @@ function importCarModel(scene, car, shadowGenerator) {
             rightLightIndex.forEach(i => {
                 if (i == index) {
                     var mat = new BABYLON.StandardMaterial('mat', scene);
-                    mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/AS2_leather_06.jpg");
+                    mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/AS2_leather_06.jpg");
                     mat.diffuseColor = new BABYLON.Color3(1, 0.8, 0);
                     mesh.material = mat;
                 }
@@ -162,7 +162,7 @@ function importCarModel(scene, car, shadowGenerator) {
     
             if (index == 109) {
                 var mat = new BABYLON.StandardMaterial('mat', scene);
-                mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/Metals.Ornamental Metals.Plate.Mesh.cutout.jpg");
+                mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/Metals.Ornamental Metals.Plate.Mesh.cutout.jpg");
                 mat.diffuseColor = new BABYLON.Color3(0.3, 0.3, 0.3);
                 mesh.material = mat;
             }
@@ -173,14 +173,14 @@ function importCarModel(scene, car, shadowGenerator) {
     
             if (index == 438) {
                 var mat = new BABYLON.StandardMaterial('mat', scene);
-                mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/SpeedWin.jpg");
+                mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/SpeedWin.jpg");
                 mat.diffuseTexture.wAng = Math.PI/2; 
                 mesh.material = mat;
             }
     
             if (index == 440) {
                 var mat = new BABYLON.StandardMaterial('mat', scene);
-                mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/computer.jpg");
+                mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/computer.jpg");
                 mat.diffuseTexture.wAng = -Math.PI/2; 
                 mat.diffuseTexture.vAng = Math.PI; 
                 mesh.material = mat;
@@ -188,7 +188,7 @@ function importCarModel(scene, car, shadowGenerator) {
     
             if (index == 293 || index == 36 || index == 68 || index == 263) {
                 var mat = new BABYLON.StandardMaterial('mat', scene);
-                mat.diffuseTexture = new BABYLON.Texture("./assets/Vehicle/Volkswagen Touareg 2/textures/218411094_tp.jpg");
+                mat.diffuseTexture = new BABYLON.Texture("assets/Vehicle/Volkswagen Touareg 2/textures/218411094_tp.jpg");
                 mat.diffuseTexture.vAng = Math.PI; 
                 mesh.material = mat;
             }
@@ -220,7 +220,7 @@ function importCarModel(scene, car, shadowGenerator) {
                 
         });
     
-            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/Volkswagen Touareg 2/model/", "Tire.obj", scene, (meshes) => {
+            new BABYLON.SceneLoader.ImportMesh(null, "assets/Vehicle/Volkswagen Touareg 2/model/", "Tire.obj", scene, (meshes) => {
                 var carWheel = BABYLON.Mesh.MergeMeshes(meshes, true, true, undefined, false, true)
                 carWheel.parent = car
                 carWheel.position = new BABYLON.Vector3(-7, 1.2, 2.8)
@@ -246,7 +246,7 @@ function importCarModel(scene, car, shadowGenerator) {
                 carWheels.push(carWheel4)
             })
     
-            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/Volkswagen Touareg 2/model/", "Steer.obj", scene, (meshes) => {
+            new BABYLON.SceneLoader.ImportMesh(null, "assets/Vehicle/Volkswagen Touareg 2/model/", "Steer.obj", scene, (meshes) => {
                 meshes.forEach((mesh, index) => {
                     mesh.parent = car
                     mesh.position = new BABYLON.Vector3(-3, 3.5, 1.3)
@@ -256,7 +256,7 @@ function importCarModel(scene, car, shadowGenerator) {
                 })
             })
     
-            new BABYLON.SceneLoader.ImportMesh(null, "./assets/Vehicle/Volkswagen Touareg 2/model/", "Stay still.obj", scene, (meshes) => {
+            new BABYLON.SceneLoader.ImportMesh(null, "assets/Vehicle/Volkswagen Touareg 2/model/", "Stay still.obj", scene, (meshes) => {
                 meshes.forEach((mesh, index) => {
                     mesh.parent = car
                     mesh.position = new BABYLON.Vector3(-3.1, 3.5, 1.3)

@@ -8,7 +8,7 @@ createGoal(position, gui, reuse_previous_gui)
 Note: gui and reuse_previous_gui is optional and defaults to none.
 
 Parameter:
-position = new BABYLON.Vector3(0, 0, 0)
+position = BABYLON.Vector3()
 gui = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI")
 reuse_previous_gui = [rect1, line, target, label]
 

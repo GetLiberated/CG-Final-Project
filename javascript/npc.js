@@ -3,19 +3,23 @@
 Create a fully colored npc with animations ready to use.
 
 Usage:
-createNPC(npc, position, rotation)
+createNPC(npc, position, rotation, scale, disabled)
+
+Note: disabled is optional and defaults to false.
 
 Parameter:
 npc = int
-position = new BABYLON.Vector3(0, 0, 0)
-rotation = new BABYLON.Vector3(0, 0, 0)
+position = BABYLON.Vector3()
+rotation = BABYLON.Vector3()
+scale = BABYLON.Vector3()
+disabled = bool
 
 Example:
 If you want to create male npc,
-createNPC(1, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0))
+createNPC(1, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0))
 
 If you want to create female npc,
-createNPC(3, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0))
+createNPC(3, new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0), new BABYLON.Vector3(0, 0, 0))
 
 If you want to make npc move forward,
 persons[0].position.x += 10
@@ -29,7 +33,7 @@ personsAnimation[0][1].play()
 var persons = [] // store all npc meshes here.
 var personsAnimation = [] // store all npc animationGroup here.
 
-function createNPC(npc, position, rotation) {
+function createNPC(npc, position, rotation, scale, disabled = false) {
     model_name = ""
     switch (npc) {
         case 1:
@@ -42,7 +46,7 @@ function createNPC(npc, position, rotation) {
             model_name = "Woman.glb"
             break
     }
-    new BABYLON.SceneLoader.ImportMesh(null, "../assets/NPC/", model_name, scene, (meshes, particleSystem, skeleton, animationGroups) => {               
+    new BABYLON.SceneLoader.ImportMesh(null, "assets/NPC/", model_name, scene, (meshes, particleSystem, skeleton, animationGroups) => {               
         persons.push(meshes)
         personsAnimation.push(animationGroups)
 
@@ -58,22 +62,13 @@ function createNPC(npc, position, rotation) {
         
         // Modify mesh properties
         meshes.forEach(mesh => {
-            mesh.scaling = new BABYLON.Vector3(3, 3, 3);
             mesh.position = position
             mesh.rotation = rotation
+            mesh.scaling = scale;
+
+            if (disabled)
+                mesh.setEnabled(false)
         });
 
     })
 }
-
-// mesh identifier
-// mesh.showBoundingBox = true;
-// mesh.actionManager = new BABYLON.ActionManager(scene);
-// mesh.actionManager.registerAction(
-//     new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickTrigger, 
-//         function(event) {
-//             console.log(index);
-//             mesh.dispose()
-//         }
-//     )
-// )
