@@ -38,6 +38,14 @@
             touch-action: none;
         }
     </style>
+
+    <script>
+        var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        if (isSafari) {
+            window.alert("This application can't be run on Safari, please download Google Chrome.")
+            window.location.href = "https://chrome.google.com"
+        }
+    </script>
 </head>
 
 <body>
@@ -262,6 +270,7 @@
                                             vehicles.forEach(mesh => {
                                                 mesh.setEnabled(true)
                                             })
+                                            camera.lowerRadiusLimit = 15
                                             camera.upperRadiusLimit = 20
                                             cutscene3()
                                             break
@@ -500,7 +509,7 @@
                             /*****************************Level 3**********************************************/
 
                             function level3() {
-                                if (car.position.x > 4.5 && car.position.z > -63.5 && car.position.z < -59.5 && Math.abs(car.rotationQuaternion.y) < 0.1) {
+                                if (car.position.x > 4.5 && car.position.z > -63.5 && car.position.z < -58 && Math.abs(car.rotationQuaternion.y) < 0.1) {
                                     if (!fail && !success) {
                                         task_texts[0].color = "green"
                                         win()
