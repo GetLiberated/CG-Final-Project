@@ -13,15 +13,15 @@
     <script src="https://preview.babylonjs.com/gui/babylon.gui.min.js"></script>
 
     <!-- Local js -->
-    <script src="./javascript/physics.js"></script>
-    <script src="./javascript/car.js"></script>
-    <script src="./javascript/map.js"></script>
-    <script src="./javascript/npc.js"></script>
-    <script src="./javascript/vehicle.js"></script>
-    <script src="./javascript/animation.js"></script>
-    <script src="./javascript/goal.js"></script>
-    <script src="./javascript/objectiveUI.js"></script>
-    <script src="./javascript/shader.js"></script>
+    <script src="./modules/physics.js"></script>
+    <script src="./modules/car.js"></script>
+    <script src="./modules/map.js"></script>
+    <script src="./modules/npc.js"></script>
+    <script src="./modules/vehicle.js"></script>
+    <script src="./modules/animation.js"></script>
+    <script src="./modules/goal.js"></script>
+    <script src="./modules/objectiveUI.js"></script>
+    <script src="./modules/shader.js"></script>
 
     <style>
         html, body {
@@ -141,7 +141,7 @@
 
                                 switch (level) {
                                     case 1:
-                                        car.position = new BABYLON.Vector3(0, 1, 0)
+                                        car.position = new BABYLON.Vector3(-10, 1, 0)
                                         car.rotationQuaternion = carStartRotation.clone();
                                         break
                                     case 2:
@@ -164,7 +164,7 @@
                                     blinkLeft()
                             }
 
-                            // called when player clicked retry or pressed 'r'
+                            // called when player clicked retry button or pressed 'r'
                             function restart() {
 
                                 // reset car to default state
@@ -267,7 +267,6 @@
                                             break
                                         case 3:
                                             level = 4
-                                            dark_overlay.alpha = 0.75
                                             check.isVisible = false
 
                                             var thx_text = new BABYLON.GUI.TextBlock();
@@ -299,8 +298,8 @@
                                             gui.addControl(vander_text);
 
                                             setTimeout(function () {
-                                                alert('you may leave now thx');
-                                            }, 4000)
+                                                alert('Reload the page if you wish to play again.');
+                                            }, 8000)
                                     }
                                 }, 1500)
                             }
@@ -323,8 +322,10 @@
                                 cutscene = 0
                                 activeCamera = 2
                                 changeCamera()
-                                dark_overlay.alpha = 0.5
+                                dark_overlay.alpha = 0.75
                                 dark_overlay.isVisible = false
+                                help_key.isVisible = true
+                                help_text.isVisible = true
                                 if (level !== 3) {
                                     mapMeshes.forEach((mesh, index) => {
                                         if (index !== 429)
@@ -513,9 +514,34 @@
 
                             /*****************************GUI********************************************/
 
+                            // press h to view help
+                            var help_key = BABYLON.GUI.Button.CreateSimpleButton("", "H");
+                            help_key.width = "40px"
+                            help_key.height = "40px";
+                            help_key.color = "black";
+                            help_key.cornerRadius = 10;
+                            help_key.background = "white";
+                            help_key.isEnabled = false
+                            help_key.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                            help_key.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                            help_key.top = 160
+                            help_key.left = 20
+                            help_key.isVisible = false
+                            gui.addControl(help_key);  
+
+                            var help_text = new BABYLON.GUI.TextBlock();
+                            help_text.text = "View control key";
+                            help_text.color = "white";
+                            help_text.fontSize = 24;
+                            help_text.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                            help_text.textVerticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                            help_text.top = 165
+                            help_text.left = 70
+                            help_text.isVisible = false
+                            gui.addControl(help_text);  
+
                             // overlay
                             var dark_overlay = new BABYLON.GUI.Image("", "assets/black.png");
-                            dark_overlay.alpha = 0.5
                             dark_overlay.isVisible = false
                             gui.addControl(dark_overlay);
 
@@ -526,6 +552,67 @@
                             check.width = 0.2
                             check.height = 0.2
                             gui.addControl(check);
+
+                            // help screen
+                            var helpScreenGUI = []
+                            function createKeyGUI(key, top, left) {
+                                var key = BABYLON.GUI.Button.CreateSimpleButton("", key);
+                                key.width = "40px"
+                                key.height = "40px";
+                                key.color = "black";
+                                key.cornerRadius = 10;
+                                key.background = "white";
+                                key.isEnabled = false
+                                key.top = top
+                                key.left = left
+                                key.isVisible = false
+                                helpScreenGUI.push(key)
+                                gui.addControl(key);  
+                            }
+
+                            createKeyGUI("W", "-240px", "50px")
+                            createKeyGUI("A", "-180px", "25px")
+                            createKeyGUI("S", "-180px", "75px")
+                            createKeyGUI("D", "-120px", "50px")
+                            createKeyGUI("Q", "0px", "25px")
+                            createKeyGUI("E", "0px", "75px")
+                            createKeyGUI("R", "60px", "50px")
+                            createKeyGUI("V", "120px", "50px")
+                            createKeyGUI("H", "180px", "50px")
+
+                            key = BABYLON.GUI.Button.CreateSimpleButton("", "Space");
+                            key.width = "200px"
+                            key.height = "40px";
+                            key.color = "black";
+                            key.cornerRadius = 6;
+                            key.background = "white";
+                            key.isEnabled = false
+                            key.top = "-60px"
+                            key.left = "50px"
+                            key.isVisible = false
+                            helpScreenGUI.push(key)
+                            gui.addControl(key);  
+
+                            function createInstructionGUI(instruction, top, left) {
+                                var text = new BABYLON.GUI.TextBlock();
+                                text.text = instruction;
+                                text.color = "white";
+                                text.fontSize = 24;
+                                text.top = top
+                                text.left = left
+                                text.isVisible = false
+                                helpScreenGUI.push(text)
+                                gui.addControl(text);  
+                            }
+
+                            createInstructionGUI("Accelerate", "-240px", "-100px")
+                            createInstructionGUI("Steer left/right", "-180px", "-100px")
+                            createInstructionGUI("Reverse", "-120px", "-100px")
+                            createInstructionGUI("Brake", "-60px", "-100px")
+                            createInstructionGUI("Blink left/right", "0px", "-100px")
+                            createInstructionGUI("Restart", "60px", "-100px")
+                            createInstructionGUI("Change view", "120px", "-100px")
+                            createInstructionGUI("View/Close this", "180px", "-100px")
 
                             // lose screen
                             var text1 = new BABYLON.GUI.TextBlock();
@@ -655,6 +742,8 @@
                                 dark_overlay.alpha = 0
                                 dark_overlay.isVisible = true
                                 check.isVisible = false
+                                help_key.isVisible = false
+                                help_text.isVisible = false
 
                                 resetCar()
                                 car.physicsImpostor.dispose()
@@ -738,6 +827,8 @@
                                 dark_overlay.alpha = 0
                                 dark_overlay.isVisible = true
                                 check.isVisible = false
+                                help_key.isVisible = false
+                                help_text.isVisible = false
 
                                 resetCar()
                                 car.physicsImpostor.dispose()
@@ -768,6 +859,8 @@
 
                             var activeCamera = 1
 
+                            var show_help = false
+
                             function changeCamera() {
                                 if (activeCamera === 1) {
                                     activeCamera = 2;
@@ -779,6 +872,14 @@
                                 }
                                 scene.activeCamera = activeCamera === 1 ? camera : camera2;
                                 activeCamera === 1 && camera.attachControl(canvas, false)
+                            }
+
+                            function helpScreen() {
+                                show_help = !show_help
+                                helpScreenGUI.forEach((gui) => {
+                                    gui.isVisible = show_help
+                                })
+                                dark_overlay.isVisible = show_help
                             }
 
                             window.addEventListener('keydown', function (e) {
@@ -812,8 +913,8 @@
                                         case 86://v
                                             changeCamera()
                                             break;
-                                        case 49://1
-                                            changeToGameMode()
+                                        case 72://h
+                                            helpScreen()
                                             break;
                                     }
                                 }
@@ -846,6 +947,8 @@
                                             break;
                                         case 86://v
                                             break;
+                                        case 72://h
+                                            break;
                                     }
                                 }
                             });
@@ -855,6 +958,7 @@
                             var vroomSFX = new BABYLON.Sound("vroomSFX", "assets/SFX/Driving.mp3", scene, null, {
                                 loop: true
                             });
+                            vroomSFX.setVolume(0.2)
 
                             function recycle(arr) {
                                 arr.forEach((meshes, index) => {
@@ -981,7 +1085,7 @@
                             engine.displayLoadingUI();
 
                             // Load the sound and play it automatically once ready
-                            var music = new BABYLON.Sound("Music", "assets/Music/Dedf1sh_-_regret.mp3", scene, null, {
+                            var music = new BABYLON.Sound("Music", "assets/Music/bensound-thelounge.mp3", scene, null, {
                                 loop: true,
                                 autoplay: true
                             });
